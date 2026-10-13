@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>AI시대 부모사전 — 부모의 질문에 답하는 AI 교육 가이드</title>
+<title>AI시대 부모백과 — 부모의 질문에 답하는 AI 교육 가이드</title>
 <meta name="description" content="숙제, 첫 사용, 계정, AI 답 믿기까지. 아이와 AI 사이에서 부모님이 실제로 묻는 질문에 결론과 근거로 답합니다.">
-<meta property="og:title" content="AI시대 부모사전 — 부모의 질문에 답하는 AI 교육 가이드">
+<meta property="og:title" content="AI시대 부모백과 — 부모의 질문에 답하는 AI 교육 가이드">
 <meta property="og:description" content="숙제, 첫 사용, 계정, AI 답 믿기까지. 아이와 AI 사이에서 부모님이 실제로 묻는 질문에 결론과 근거로 답합니다.">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="AI시대 부모사전">
+<meta property="og:site_name" content="AI시대 부모백과">
 <meta name="theme-color" content="#EEF3EE">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="bar"><a class="logo" href="">AI시대 <b>부모사전</b></a><a class="by" href="about/">휴먼쌤</a></header>
+<header class="bar"><a class="logo" href="">AI시대 <b>부모백과</b></a><a class="by" href="about/">휴먼쌤</a></header>
 <main class="pad">
 <h1 class="hello">우리 아이, 지금<br>어떤 상황인가요?</h1>
 <section class="pick" aria-label="아이 나이"><h2>아이 나이</h2><div class="seg" id="ages"><button type="button" data-age="preschool" aria-pressed="false">유아</button><button type="button" data-age="elementary" aria-pressed="true">초등</button><button type="button" data-age="teen" aria-pressed="false">중고등</button></div></section>
@@ -30,6 +30,6 @@ function set(age){var shown=0;btns.forEach(function(b){b.setAttribute('aria-pres
 btns.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.age)})});var saved=null;try{saved=localStorage.getItem(KEY)}catch(e){}set(saved||'elementary');})();
 </script>
 </main>
-<footer class="foot"><p>AI시대 부모사전 · 질문에 답하는 사람 휴먼쌤 김수현</p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></footer>
+<footer class="foot"><p>AI시대 부모백과 · 질문에 답하는 사람 휴먼쌤 김수현</p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></footer>
 </body>
 </html>

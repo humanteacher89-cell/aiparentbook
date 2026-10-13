@@ -1,4 +1,4 @@
-# AI시대 부모사전 (aiparentbook.com)
+# AI시대 부모백과 (aiparentbook.com)
 
 부모의 질문에 답하는 AI 교육 가이드. 정적 사이트, GitHub Pages(main 브랜치 `/docs`)로 공개한다.
 

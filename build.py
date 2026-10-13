@@ -1,4 +1,4 @@
-"""AI시대 부모사전(aiparentbook.com) 정적 사이트 만들기.
+"""AI시대 부모백과(aiparentbook.com) 정적 사이트 만들기.
 
   python build.py import <bundle.json>   연재부 묶음에서 공개해도 되는 글만 data/notes.json으로 가져온다
   python build.py build                  data/notes.json + config.json -> docs/ (GitHub Pages가 보는 폴더)
@@ -95,7 +95,7 @@ def page(prefix, title, desc, body, canonical=""):
 <meta property="og:title" content="{t}">
 <meta property="og:description" content="{d}">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="AI시대 부모사전">
+<meta property="og:site_name" content="AI시대 부모백과">
 <meta name="theme-color" content="#EEF3EE">
 <link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,11 +104,11 @@ def page(prefix, title, desc, body, canonical=""):
 <link rel="stylesheet" href="{prefix}style.css">
 </head>
 <body>
-<header class="bar"><a class="logo" href="{prefix}">AI시대 <b>부모사전</b></a><a class="by" href="{prefix}about/">휴먼쌤</a></header>
+<header class="bar"><a class="logo" href="{prefix}">AI시대 <b>부모백과</b></a><a class="by" href="{prefix}about/">휴먼쌤</a></header>
 <main class="pad">
 {body}
 </main>
-<footer class="foot"><p>AI시대 부모사전 · 질문에 답하는 사람 휴먼쌤 김수현</p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></footer>
+<footer class="foot"><p>AI시대 부모백과 · 질문에 답하는 사람 휴먼쌤 김수현</p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></footer>
 </body>
 </html>
 """
@@ -157,7 +157,7 @@ def build_index(cfg, notes):
 function set(age){{var shown=0;btns.forEach(function(b){{b.setAttribute('aria-pressed',b.dataset.age===age?'true':'false')}});tiles.forEach(function(t){{var ok=(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1;t.hidden=!ok;if(ok)shown++}});empty.hidden=shown>0;try{{localStorage.setItem(KEY,age)}}catch(e){{}}}}
 btns.forEach(function(b){{b.addEventListener('click',function(){{set(b.dataset.age)}})}});var saved=null;try{{saved=localStorage.getItem(KEY)}}catch(e){{}}set(saved||'elementary');}})();
 </script>"""
-    return page("", "AI시대 부모사전 — 부모의 질문에 답하는 AI 교육 가이드",
+    return page("", "AI시대 부모백과 — 부모의 질문에 답하는 AI 교육 가이드",
                 "숙제, 첫 사용, 계정, AI 답 믿기까지. 아이와 AI 사이에서 부모님이 실제로 묻는 질문에 결론과 근거로 답합니다.", body)
 
 
@@ -170,7 +170,7 @@ def build_note(cfg, n, c):
         body = f"""{crumb}<h1 class="q">{inline(n['question'])}</h1>
 <div class="ans soon-box"><div class="big">{fmt_date(c['release'])}에 공개돼요</div><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div>
 <p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
-        return page(prefix, f"{n['question']} — AI시대 부모사전", f"{fmt_date(c['release'])} 공개 예정", body)
+        return page(prefix, f"{n['question']} — AI시대 부모백과", f"{fmt_date(c['release'])} 공개 예정", body)
 
     # 결론 첫 문장을 큰 글씨로 떼어 내고, 나머지는 정본 그대로 잇는다
     raw = n["conclusion"].strip()
@@ -209,25 +209,25 @@ def build_note(cfg, n, c):
 <section class="evs" id="evidence"><h2>근거</h2>{''.join(ev_html)}</section>
 <section class="paid" id="practice"><h2>오늘 저녁 바로 해 보려면</h2><p class="kitname">실천 자료 「{html.escape(n['material'])}」 PDF {n['pages']}쪽</p><ul>{kit}</ul>{cta}{wb}</section>
 <p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
-    return page(prefix, f"{n['question']} — AI시대 부모사전", big, body)
+    return page(prefix, f"{n['question']} — AI시대 부모백과", big, body)
 
 
 def build_situation(cfg, notes, s, nos):
     prefix = "../../"
     rows = "".join(note_card_html(prefix, notes[no], cfg["notes"][no], cfg) for no in nos)
     body = f'<p class="crumb">상황</p><h1 class="q">{html.escape(s["label"])}</h1><section class="pick"><div class="rows">{rows}</div></section><p><a class="back" href="{prefix}">처음으로</a></p>'
-    return page(prefix, f"{s['label']} — AI시대 부모사전", "이 상황에 맞는 질문과 답", body)
+    return page(prefix, f"{s['label']} — AI시대 부모백과", "이 상황에 맞는 질문과 답", body)
 
 
 def build_about():
     prefix = "../"
-    body = """<p class="crumb">소개</p><h1 class="q">AI시대 부모사전</h1>
+    body = """<p class="crumb">소개</p><h1 class="q">AI시대 부모백과</h1>
 <section class="ans"><div class="big">부모의 질문에 답하는 AI 교육 가이드</div>
 <p>아이와 AI 사이에서 부모님이 실제로 묻는 질문 하나에 결론과 근거로 답합니다. 결론 끝에는 오늘 해 볼 한 가지를, 근거 끝에는 아직 모르는 것을 함께 적어요.</p>
 <p>결론과 근거는 누구나 무료로 읽을 수 있어요. 아이와 바로 해 볼 수 있는 실천 자료는 네이버 프리미엄콘텐츠에서 단품으로 만나실 수 있어요. 광고는 붙이지 않아요.</p></section>
 <section class="ans"><div class="big">답하는 사람 · 휴먼쌤 김수현</div><p>현직 초등교사이자 아빠입니다.</p></section>
 <p><a class="back" href="../">처음으로</a></p>"""
-    return page(prefix, "소개 — AI시대 부모사전", "부모의 질문에 답하는 AI 교육 가이드, AI시대 부모사전 소개", body)
+    return page(prefix, "소개 — AI시대 부모백과", "부모의 질문에 답하는 AI 교육 가이드, AI시대 부모백과 소개", body)
 
 
 def cmd_build():
@@ -257,7 +257,7 @@ def cmd_build():
         nos = [no for no, c in cfg["notes"].items() if c["situation"] == s["id"] and no in notes]
         if len(nos) > 1:
             write(f"s/{s['id']}/index.html", build_situation(cfg, notes, s, nos))
-    nf = page("/", "찾는 페이지가 없어요 — AI시대 부모사전", "", '<h1 class="q">찾는 페이지가 없어요</h1><p><a class="back" href="./">처음으로</a></p>')
+    nf = page("/", "찾는 페이지가 없어요 — AI시대 부모백과", "", '<h1 class="q">찾는 페이지가 없어요</h1><p><a class="back" href="./">처음으로</a></p>')
     write("404.html", nf)
     print("docs/ 만듦:", sum(1 for _ in OUT.rglob("*.html")), "쪽")
 
