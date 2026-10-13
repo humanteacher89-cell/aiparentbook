@@ -1,0 +1,22 @@
+{
+  "site_name": "AI시대 부모사전",
+  "tagline": "부모의 질문에 답하는 AI 교육 가이드",
+  "ages": [
+    {"id": "preschool", "label": "유아"},
+    {"id": "elementary", "label": "초등"},
+    {"id": "teen", "label": "중고등"}
+  ],
+  "situations": [
+    {"id": "homework", "label": "숙제에 AI를 쓰려고 해요"},
+    {"id": "start", "label": "처음 AI를 써 보려고 해요"},
+    {"id": "trust", "label": "AI 답을 그대로 믿어요"},
+    {"id": "wrong", "label": "AI가 틀린 것 같아요"}
+  ],
+  "notes": {
+    "001": {"published": false, "release": "2026-10-22", "ages": ["elementary"], "situation": "homework", "nepcon_url": ""},
+    "002": {"published": false, "release": "2026-10-29", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
+    "003": {"published": false, "release": "2026-11-05", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
+    "004": {"published": false, "release": "2026-11-12", "ages": ["elementary"], "situation": "trust", "nepcon_url": ""},
+    "005": {"published": false, "release": "2026-11-19", "ages": ["elementary"], "situation": "wrong", "nepcon_url": ""}
+  }
+}

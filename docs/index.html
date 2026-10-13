@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>AI시대 부모사전 — 부모의 질문에 답하는 AI 교육 가이드</title>
+<meta name="description" content="숙제, 첫 사용, 계정, AI 답 믿기까지. 아이와 AI 사이에서 부모님이 실제로 묻는 질문에 결론과 근거로 답합니다.">
+<meta property="og:title" content="AI시대 부모사전 — 부모의 질문에 답하는 AI 교육 가이드">
+<meta property="og:description" content="숙제, 첫 사용, 계정, AI 답 믿기까지. 아이와 AI 사이에서 부모님이 실제로 묻는 질문에 결론과 근거로 답합니다.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="AI시대 부모사전">
+<meta name="theme-color" content="#EEF3EE">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="bar"><a class="logo" href="">AI시대 <b>부모사전</b></a><a class="by" href="about/">휴먼쌤</a></header>
+<main class="pad">
+<h1 class="hello">우리 아이, 지금<br>어떤 상황인가요?</h1>
+<section class="pick" aria-label="아이 나이"><h2>아이 나이</h2><div class="seg" id="ages"><button type="button" data-age="preschool" aria-pressed="false">유아</button><button type="button" data-age="elementary" aria-pressed="true">초등</button><button type="button" data-age="teen" aria-pressed="false">중고등</button></div></section>
+<section class="tiles" id="tiles"><a class="tile hot" href="q/001/" data-ages="elementary"><b>숙제에 AI를 쓰려고 해요</b><small>10월 22일(목) 공개</small></a><a class="tile" href="s/start/" data-ages="elementary"><b>처음 AI를 써 보려고 해요</b><small>10월 29일(목) 공개</small></a><a class="tile" href="q/004/" data-ages="elementary"><b>AI 답을 그대로 믿어요</b><small>11월 12일(목) 공개</small></a><a class="tile" href="q/005/" data-ages="elementary"><b>AI가 틀린 것 같아요</b><small>11월 19일(목) 공개</small></a></section>
+<p class="empty" id="empty" hidden>이 나이에 맞는 질문은 아직 없어요. 지금은 초등 자녀를 둔 부모님 질문부터 답하고 있어요.</p>
+<section class="pick"><h2>곧 공개되는 질문</h2><div class="rows"><a class="row soon" href="q/001/"><b>숙제할 때 아이가 챗GPT를 써도 되나요?</b><span>10월 22일(목) 공개</span></a><a class="row soon" href="q/002/"><b>몇 살부터 AI를 혼자 써도 되나요?</b><span>10월 29일(목) 공개</span></a><a class="row soon" href="q/003/"><b>아이 계정을 따로 만들어 줄까요, 제 계정으로 쓰게 할까요?</b><span>11월 5일(목) 공개</span></a><a class="row soon" href="q/004/"><b>아이가 AI 답을 그대로 믿으면 어떡하죠?</b><span>11월 12일(목) 공개</span></a><a class="row soon" href="q/005/"><b>AI도 틀리나요?</b><span>11월 19일(목) 공개</span></a></div></section>
+<script>
+(function(){var KEY='apb-age',btns=[].slice.call(document.querySelectorAll('#ages button')),tiles=[].slice.call(document.querySelectorAll('#tiles .tile')),empty=document.getElementById('empty');
+function set(age){var shown=0;btns.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.age===age?'true':'false')});tiles.forEach(function(t){var ok=(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1;t.hidden=!ok;if(ok)shown++});empty.hidden=shown>0;try{localStorage.setItem(KEY,age)}catch(e){}}
+btns.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.age)})});var saved=null;try{saved=localStorage.getItem(KEY)}catch(e){}set(saved||'elementary');})();
+</script>
+</main>
+<footer class="foot"><p>AI시대 부모사전 · 질문에 답하는 사람 휴먼쌤 김수현</p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></footer>
+</body>
+</html>
