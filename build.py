@@ -54,6 +54,7 @@ def cmd_import(bundle_path):
 # ---------------------------------------------------------------- text
 def inline(s):
     s = html.escape(s, quote=False)
+    s = re.sub(r"==(.+?)==", r"<mark>\1</mark>", s)  # 네프콘 노란 형광펜
     return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
 
 
@@ -62,7 +63,9 @@ def md_blocks(text):
     out = []
     for block in re.split(r"\n\s*\n", text.strip()):
         lines = block.strip().splitlines()
-        if all(re.match(r"\d+\.\s", l) for l in lines):
+        if all(l.startswith(">") for l in lines):
+            out.append(("quote", "<br>".join(inline(l.lstrip("> ").strip()) for l in lines)))
+        elif all(re.match(r"\d+\.\s", l) for l in lines):
             out.append("<ol>" + "".join(f"<li>{inline(re.sub(r'^\d+\.\s', '', l))}</li>" for l in lines) + "</ol>")
         else:
             out.append(("today", block) if block.startswith("**오늘 해 볼 한 가지**") else
@@ -119,7 +122,7 @@ def note_card_html(prefix, n, c, cfg):
     href = f"{prefix}q/{n['no']}/"
     if c.get("published"):
         return f'<a class="row" href="{href}"><b>{inline(n["question"])}</b><span>{n["no"]}</span></a>'
-    return f'<a class="row soon" href="{href}"><b>{inline(n["question"])}</b><span>{fmt_date(c["release"])} 공개</span></a>'
+    return f'<a class="row soon" href="{href}"><b>{inline(n["question"])}</b><span>준비 중</span></a>'
 
 
 def build_index(cfg, notes):
@@ -139,14 +142,14 @@ def build_index(cfg, notes):
         ages = sorted({a for no in nos for a in cfg["notes"][no]["ages"]})
         href = f"q/{nos[0]}/" if len(nos) == 1 else f"s/{s['id']}/"
         live = [no for no in nos if cfg["notes"][no].get("published")]
-        sub = " · ".join(nos) if live else f"{fmt_date(min(cfg['notes'][no]['release'] for no in nos))} 공개"
+        sub = " · ".join(live) if live else "준비 중"
         tiles.append(f'<a class="tile{" hot" if i == 0 else ""}" href="{href}" data-ages="{" ".join(ages)}"><b>{html.escape(s["label"])}</b><small>{sub}</small></a>')
     order = sorted(cfg["notes"], key=lambda k: cfg["notes"][k]["release"], reverse=True)
     latest = [no for no in order if cfg["notes"][no].get("published") and no in notes][:3]
     upcoming = sorted([no for no in cfg["notes"] if not cfg["notes"][no].get("published") and no in notes],
                       key=lambda k: cfg["notes"][k]["release"])
     rows = "".join(note_card_html("", notes[no], cfg["notes"][no], cfg) for no in (latest or upcoming))
-    list_title = "새로 올라온 질문" if latest else "곧 공개되는 질문"
+    list_title = "새로 올라온 질문" if latest else "준비 중인 질문"
     body = f"""<h1 class="hello">우리 아이, 지금<br>어떤 상황인가요?</h1>
 <section class="pick" aria-label="아이 나이"><h2>아이 나이</h2><div class="seg" id="ages">{age_btns}</div></section>
 <section class="tiles" id="tiles">{''.join(tiles)}</section>
@@ -168,9 +171,9 @@ def build_note(cfg, n, c):
     crumb = f'<p class="crumb">{ages} · {html.escape(sit["label"])} · {n["no"]}</p>'
     if not c.get("published"):
         body = f"""{crumb}<h1 class="q">{inline(n['question'])}</h1>
-<div class="ans soon-box"><div class="big">{fmt_date(c['release'])}에 공개돼요</div><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div>
+<div class="ans soon-box"><div class="big">준비 중이에요</div><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div>
 <p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
-        return page(prefix, f"{n['question']} — AI시대 부모백과", f"{fmt_date(c['release'])} 공개 예정", body)
+        return page(prefix, f"{n['question']} — AI시대 부모백과", "준비 중", body)
 
     # 결론 첫 문장을 큰 글씨로 떼어 내고, 나머지는 정본 그대로 잇는다
     raw = n["conclusion"].strip()
@@ -184,21 +187,37 @@ def build_note(cfg, n, c):
             today = f'<div class="today"><b>오늘 해 볼 한 가지</b>{lead_rest(b[1], "**오늘 해 볼 한 가지**")}</div>'
         elif isinstance(b, str):
             concl_html.append(b)
-    ev_html = []
-    for i, b in enumerate(md_blocks(n["evidence"])):
+    # 굵은 제목 덩어리(<b>…</b>만 있는 줄)부터 다음 제목·인용구 전까지를 한 접이 칸으로 묶는다
+    ev_html, group = [], None
+
+    def close():
+        nonlocal group
+        if group:
+            title, parts = group
+            ev_html.append(f'<details{" open" if len(ev_html) == 0 else ""}><summary>{title}</summary>{"".join(parts)}</details>')
+        group = None
+    for b in md_blocks(n["evidence"]):
         if isinstance(b, tuple) and b[0] == "unknown":
+            close()
             ev_html.append(f'<details open><summary>아직 모르는 것</summary><p>{lead_rest(b[1], "**아직 모르는 것**")}</p></details>')
+        elif isinstance(b, tuple) and b[0] == "quote":
+            close()
+            ev_html.append(f'<blockquote class="sum">{b[1]}</blockquote>')
         elif isinstance(b, str):
-            m = re.match(r"<p><b>(.+?)</b>\s*(.*)</p>$", b, re.S)
-            if m:
-                ev_html.append(f'<details{" open" if i == 0 else ""}><summary>{m.group(1)}</summary><p>{m.group(2)}</p></details>')
+            head = re.match(r"<p><b>([^<]+)</b>(?:<br>|\s+)?(.*)</p>$", b, re.S)
+            if head:
+                close()
+                group = (head.group(1), [f"<p>{head.group(2).strip()}</p>"] if head.group(2).strip() else [])
+            elif group:
+                group[1].append(b)
             else:
                 ev_html.append(b)
+    close()
     # 구성 목록 첫 줄의 「자료 이름」 A4 n쪽. 은 바로 위 제목과 겹치므로 떼어 낸다
     kit_items = [re.sub(r"^「[^」]+」\s*A4\s*\d+쪽\.?\s*", "", k) for k in n.get("kit", [])]
     kit = "".join(f'<li>{inline(k)}</li>' for k in kit_items if k)
     if c.get("nepcon_url"):
-        cta = f'<a class="btn" href="{html.escape(c["nepcon_url"])}" rel="noopener">네이버 프리미엄콘텐츠에서 단품으로 받기</a>'
+        cta = f'<a class="btn" href="{html.escape(c["nepcon_url"])}" rel="noopener">네이버 프리미엄콘텐츠에서 활동지 받기</a>'
     else:
         cta = '<p class="btn off">네이버 프리미엄콘텐츠 단품 · 링크 준비 중</p>'
     wb = '<p class="wb">이 실천 자료는 『어린이를 위한 AI시대 생각주도력 워크북(기초편)』에도 묶여 나올 예정이에요.</p>' if n.get("workbook") else ""
@@ -207,7 +226,7 @@ def build_note(cfg, n, c):
 <section class="ans" id="conclusion"><h2 class="sr">결론</h2><div class="big">{html.escape(big)}</div>{''.join(concl_html)}</section>
 {today}
 <section class="evs" id="evidence"><h2>근거</h2>{''.join(ev_html)}</section>
-<section class="paid" id="practice"><h2>오늘 저녁 바로 해 보려면</h2><p class="kitname">실천 자료 「{html.escape(n['material'])}」 PDF {n['pages']}쪽</p><ul>{kit}</ul>{cta}{wb}</section>
+<section class="paid" id="practice"><h2>오늘 저녁 바로 해 보려면</h2><p class="kitname">휴먼쌤 ACT 3단계 · 활동지 「{html.escape(n['material'])}」 PDF {n['pages']}쪽</p><ul>{kit}</ul>{cta}{wb}</section>
 <p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
     return page(prefix, f"{n['question']} — AI시대 부모백과", big, body)
 

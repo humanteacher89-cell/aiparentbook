@@ -13,7 +13,7 @@
     {"id": "wrong", "label": "AI가 틀린 것 같아요"}
   ],
   "notes": {
-    "001": {"published": false, "release": "2026-10-22", "ages": ["elementary"], "situation": "homework", "nepcon_url": ""},
+    "001": {"published": true, "release": "2026-10-13", "ages": ["elementary"], "situation": "homework", "nepcon_url": "https://contents.premium.naver.com/humanteacher/humanteacher89/contents/261013204144598up"},
     "002": {"published": false, "release": "2026-10-29", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
     "003": {"published": false, "release": "2026-11-05", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
     "004": {"published": false, "release": "2026-11-12", "ages": ["elementary"], "situation": "trust", "nepcon_url": ""},
