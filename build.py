@@ -84,6 +84,28 @@ def fmt_date(iso):
     return f"{d.month}월 {d.day}일({WEEK[d.weekday()]})"
 
 
+def split_conclusion(n):
+    """결론 첫 문장(큰 글씨), 나머지 문단들, '오늘 해 볼 한 가지' 문장. 모두 정본 그대로."""
+    raw = n["conclusion"].strip()
+    m = re.match(r"(.+?[.?!])\s+(.*)$", raw, re.S)
+    big, rest = (m.group(1), m.group(2)) if m else (raw, "")
+    paras, today = [], ""
+    for b in (md_blocks(rest) if rest else []):
+        if isinstance(b, tuple) and b[0] == "today":
+            today = lead_rest(b[1], "**오늘 해 볼 한 가지**")
+        elif isinstance(b, str):
+            paras.append(b)
+    return big, paras, today
+
+
+ACT = '<span><i>A</i>질문하기</span><span><i>C</i>확인하기</span><span><i>T</i>실천하기</span>'
+
+
+def short_date(iso):
+    d = date.fromisoformat(iso)
+    return f"{d.month}.{d.day}"
+
+
 # ---------------------------------------------------------------- page shell
 def page(prefix, title, desc, body, canonical=""):
     t = html.escape(title)
@@ -99,7 +121,7 @@ def page(prefix, title, desc, body, canonical=""):
 <meta property="og:description" content="{d}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AI시대 부모백과">
-<meta name="theme-color" content="#EEF3EE">
+<meta name="theme-color" content="#FFFDF6">
 <link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -121,43 +143,54 @@ def page(prefix, title, desc, body, canonical=""):
 def note_card_html(prefix, n, c, cfg):
     href = f"{prefix}q/{n['no']}/"
     if c.get("published"):
-        return f'<a class="row" href="{href}"><b>{inline(n["question"])}</b><span>{n["no"]}</span></a>'
-    return f'<a class="row soon" href="{href}"><b>{inline(n["question"])}</b><span>준비 중</span></a>'
+        return f'<a class="row" href="{href}" data-ages="{" ".join(c["ages"])}"><b>{inline(n["question"])}</b><span>{n["no"]}</span></a>'
+    return f'<a class="row soon" href="{href}" data-ages="{" ".join(c["ages"])}"><b>{inline(n["question"])}</b><span>{short_date(c["release"])}</span></a>'
+
+
+def age_label(cfg, c):
+    return " · ".join(a["label"] for a in cfg["ages"] if a["id"] in c["ages"])
+
+
+def build_hero(cfg, n, c):
+    href = f"q/{n['no']}/"
+    if c.get("published"):
+        big, paras, today = split_conclusion(n)
+        tag = f"새로 올라온 질문 · {age_label(cfg, c)}"
+        ans = f'<div class="hero-ans"><b>{html.escape(big)}</b>{paras[0] if paras else ""}</div>'
+        todo = f'<div class="todo"><b>오늘 해 볼 한 가지</b>{today}</div>' if today else ""
+        rest = f'{todo}<a class="act" href="{href}#practice" aria-label="휴먼쌤 ACT 실천 3단계 보기">{ACT}</a><a class="go" href="{href}">답과 근거 읽기</a>'
+    else:
+        tag = f"곧 올라올 질문 · {age_label(cfg, c)}"
+        ans = f'<div class="hero-ans"><b>{fmt_date(c["release"])} 공개</b><p>휴먼쌤이 결론과 근거를 정리하고 있어요.</p></div>'
+        rest = ""
+    return f"""<section class="hero" aria-labelledby="hero-q"><span class="no" aria-hidden="true">{n['no']}</span><p class="tag">{tag}</p>
+<h1 id="hero-q"><a href="{href}">{inline(n['question'])}</a></h1>{ans}{rest}</section>"""
 
 
 def build_index(cfg, notes):
-    sit = {s["id"]: s for s in cfg["situations"]}
-    by_sit = {}
-    for no, c in cfg["notes"].items():
-        if no in notes:
-            by_sit.setdefault(c["situation"], []).append(no)
+    live = sorted([no for no, c in cfg["notes"].items() if c.get("published") and no in notes],
+                  key=lambda k: cfg["notes"][k]["release"], reverse=True)
+    upcoming = sorted([no for no, c in cfg["notes"].items() if not c.get("published") and no in notes],
+                      key=lambda k: cfg["notes"][k]["release"])
+    top = (live or upcoming)[0]
+    hero = build_hero(cfg, notes[top], cfg["notes"][top])
+    cards = "".join(
+        f'<a class="card" href="q/{no}/"><small>{no} · {fmt_date(cfg["notes"][no]["release"])}</small><b>{inline(notes[no]["question"])}</b></a>'
+        for no in upcoming if no != top)
+    next_sec = f'<section class="next-sec"><h2>곧 올라올 질문</h2><div class="next">{cards}</div></section>' if cards else ""
     age_btns = "".join(
         f'<button type="button" data-age="{a["id"]}" aria-pressed="{"true" if a["id"] == "elementary" else "false"}">{a["label"]}</button>'
         for a in cfg["ages"])
-    tiles = []
-    for i, s in enumerate(cfg["situations"]):
-        nos = by_sit.get(s["id"], [])
-        if not nos:
-            continue
-        ages = sorted({a for no in nos for a in cfg["notes"][no]["ages"]})
-        href = f"q/{nos[0]}/" if len(nos) == 1 else f"s/{s['id']}/"
-        live = [no for no in nos if cfg["notes"][no].get("published")]
-        sub = " · ".join(live) if live else "준비 중"
-        tiles.append(f'<a class="tile{" hot" if i == 0 else ""}" href="{href}" data-ages="{" ".join(ages)}"><b>{html.escape(s["label"])}</b><small>{sub}</small></a>')
-    order = sorted(cfg["notes"], key=lambda k: cfg["notes"][k]["release"], reverse=True)
-    latest = [no for no in order if cfg["notes"][no].get("published") and no in notes][:3]
-    upcoming = sorted([no for no in cfg["notes"] if not cfg["notes"][no].get("published") and no in notes],
-                      key=lambda k: cfg["notes"][k]["release"])
-    rows = "".join(note_card_html("", notes[no], cfg["notes"][no], cfg) for no in (latest or upcoming))
-    list_title = "새로 올라온 질문" if latest else "준비 중인 질문"
-    body = f"""<h1 class="hello">우리 아이, 지금<br>어떤 상황인가요?</h1>
-<section class="pick" aria-label="아이 나이"><h2>아이 나이</h2><div class="seg" id="ages">{age_btns}</div></section>
-<section class="tiles" id="tiles">{''.join(tiles)}</section>
-<p class="empty" id="empty" hidden>이 나이에 맞는 질문은 아직 없어요. 지금은 초등 자녀를 둔 부모님 질문부터 답하고 있어요.</p>
-<section class="pick"><h2>{list_title}</h2><div class="rows">{rows}</div></section>
+    rows = "".join(note_card_html("", notes[no], cfg["notes"][no], cfg) for no in sorted(cfg["notes"]) if no in notes)
+    body = f"""{hero}
+{next_sec}
+<section class="all" aria-labelledby="all-h"><h2 id="all-h">질문 모두 보기 <small>{len([no for no in cfg["notes"] if no in notes])}개</small></h2>
+<div class="seg" id="ages" role="group" aria-label="아이 나이">{age_btns}</div>
+<div class="rows" id="rows">{rows}</div>
+<p class="empty" id="empty" hidden>이 나이에 맞는 질문은 아직 없어요. 지금은 초등 자녀를 둔 부모님 질문부터 답하고 있어요.</p></section>
 <script>
-(function(){{var KEY='apb-age',btns=[].slice.call(document.querySelectorAll('#ages button')),tiles=[].slice.call(document.querySelectorAll('#tiles .tile')),empty=document.getElementById('empty');
-function set(age){{var shown=0;btns.forEach(function(b){{b.setAttribute('aria-pressed',b.dataset.age===age?'true':'false')}});tiles.forEach(function(t){{var ok=(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1;t.hidden=!ok;if(ok)shown++}});empty.hidden=shown>0;try{{localStorage.setItem(KEY,age)}}catch(e){{}}}}
+(function(){{var KEY='apb-age',btns=[].slice.call(document.querySelectorAll('#ages button')),rows=[].slice.call(document.querySelectorAll('#rows .row')),empty=document.getElementById('empty');
+function set(age){{var shown=0;btns.forEach(function(b){{b.setAttribute('aria-pressed',b.dataset.age===age?'true':'false')}});rows.forEach(function(t){{var ok=(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1;t.hidden=!ok;if(ok)shown++}});empty.hidden=shown>0;try{{localStorage.setItem(KEY,age)}}catch(e){{}}}}
 btns.forEach(function(b){{b.addEventListener('click',function(){{set(b.dataset.age)}})}});var saved=null;try{{saved=localStorage.getItem(KEY)}}catch(e){{}}set(saved||'elementary');}})();
 </script>"""
     return page("", "AI시대 부모백과 — 부모의 질문에 답하는 AI 교육 가이드",
@@ -167,26 +200,17 @@ btns.forEach(function(b){{b.addEventListener('click',function(){{set(b.dataset.a
 def build_note(cfg, n, c):
     prefix = "../../"
     sit = next(s for s in cfg["situations"] if s["id"] == c["situation"])
-    ages = " · ".join(a["label"] for a in cfg["ages"] if a["id"] in c["ages"])
-    crumb = f'<p class="crumb">{ages} · {html.escape(sit["label"])} · {n["no"]}</p>'
+    crumb = f'<p class="tag">{age_label(cfg, c)} · {html.escape(sit["label"])}</p>'
+    no_mark = f'<span class="no" aria-hidden="true">{n["no"]}</span>'
     if not c.get("published"):
-        body = f"""{crumb}<h1 class="q">{inline(n['question'])}</h1>
-<div class="ans soon-box"><div class="big">준비 중이에요</div><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div>
+        body = f"""<section class="hero">{no_mark}{crumb}<h1>{inline(n['question'])}</h1>
+<div class="hero-ans"><b>{fmt_date(c["release"])} 공개</b><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div></section>
 <p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
         return page(prefix, f"{n['question']} — AI시대 부모백과", "준비 중", body)
 
     # 결론 첫 문장을 큰 글씨로 떼어 내고, 나머지는 정본 그대로 잇는다
-    raw = n["conclusion"].strip()
-    m = re.match(r"(.+?[.?!])\s+(.*)$", raw, re.S)
-    big, rest = (m.group(1), m.group(2)) if m else (raw, "")
-    concl = md_blocks(rest) if rest else []
-    concl_html = []
-    today = ""
-    for b in concl:
-        if isinstance(b, tuple) and b[0] == "today":
-            today = f'<div class="today"><b>오늘 해 볼 한 가지</b>{lead_rest(b[1], "**오늘 해 볼 한 가지**")}</div>'
-        elif isinstance(b, str):
-            concl_html.append(b)
+    big, concl_html, today = split_conclusion(n)
+    today = f'<div class="todo"><b>오늘 해 볼 한 가지</b>{today}</div>' if today else ""
     # 굵은 제목 덩어리(<b>…</b>만 있는 줄)부터 다음 제목·인용구 전까지를 한 접이 칸으로 묶는다
     ev_html, group = [], None
 
@@ -221,12 +245,11 @@ def build_note(cfg, n, c):
     else:
         cta = '<p class="btn off">네이버 프리미엄콘텐츠 단품 · 링크 준비 중</p>'
     wb = '<p class="wb">이 실천 자료는 『어린이를 위한 AI시대 생각주도력 워크북(기초편)』에도 묶여 나올 예정이에요.</p>' if n.get("workbook") else ""
-    body = f"""{crumb}<h1 class="q">{inline(n['question'])}</h1>
+    body = f"""<section class="hero" id="conclusion">{no_mark}{crumb}<h1>{inline(n['question'])}</h1>
+<div class="hero-ans"><h2 class="sr">결론</h2><b>{html.escape(big)}</b>{''.join(concl_html)}</div>{today}</section>
 <nav class="tabs" aria-label="이 글의 차례"><a href="#conclusion">결론</a><a href="#evidence">근거</a><a href="#practice">실천</a></nav>
-<section class="ans" id="conclusion"><h2 class="sr">결론</h2><div class="big">{html.escape(big)}</div>{''.join(concl_html)}</section>
-{today}
 <section class="evs" id="evidence"><h2>근거</h2>{''.join(ev_html)}</section>
-<section class="paid" id="practice"><h2>오늘 저녁 바로 해 보려면</h2><p class="kitname">휴먼쌤 ACT 3단계 · 활동지 「{html.escape(n['material'])}」 PDF {n['pages']}쪽</p><ul>{kit}</ul>{cta}{wb}</section>
+<section class="paid" id="practice"><div class="act" aria-hidden="true">{ACT}</div><h2>오늘 저녁 바로 해 보려면</h2><p class="kitname">휴먼쌤 ACT 3단계 · 활동지 「{html.escape(n['material'])}」 PDF {n['pages']}쪽</p><ul>{kit}</ul>{cta}{wb}</section>
 <p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
     return page(prefix, f"{n['question']} — AI시대 부모백과", big, body)
 
