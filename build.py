@@ -102,6 +102,8 @@ ACT = '<span><i>A</i>질문하기</span><span><i>C</i>확인하기</span><span><
 
 
 def short_date(iso):
+    if not iso:
+        return "준비 중"
     d = date.fromisoformat(iso)
     return f"{d.month}.{d.day}"
 
@@ -170,7 +172,8 @@ def build_hero(cfg, n, c):
 def build_index(cfg, notes):
     live = sorted([no for no, c in cfg["notes"].items() if c.get("published") and no in notes],
                   key=lambda k: cfg["notes"][k]["release"], reverse=True)
-    upcoming = sorted([no for no, c in cfg["notes"].items() if not c.get("published") and no in notes],
+    # 공개일이 정해진 글만 '곧 올라올 질문'에 (공개일이 비어 있으면 목록에만 '준비 중'으로)
+    upcoming = sorted([no for no, c in cfg["notes"].items() if not c.get("published") and c.get("release") and no in notes],
                       key=lambda k: cfg["notes"][k]["release"])
     top = (live or upcoming)[0]
     hero = build_hero(cfg, notes[top], cfg["notes"][top])
@@ -214,8 +217,9 @@ def build_note(cfg, n, c):
     crumb = f'<p class="tag">{age_label(cfg, c)} · {html.escape(sit["label"])}</p>'
     no_mark = f'<span class="no" aria-hidden="true">{n["no"]}</span>'
     if not c.get("published"):
+        when = f'{fmt_date(c["release"])} 공개' if c.get("release") else "준비 중"
         body = f"""<section class="hero">{no_mark}{crumb}<h1>{inline(n['question'])}</h1>
-<div class="hero-ans"><b>{fmt_date(c["release"])} 공개</b><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div></section>
+<div class="hero-ans"><b>{when}</b><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div></section>
 <p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
         return page(prefix, f"{n['question']} — AI시대 부모백과", "준비 중", body)
 
