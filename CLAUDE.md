@@ -11,11 +11,14 @@
 | `data/notes.json` | 글 문장. 공개된 글만 본문이 들어 있다(공개 전 글은 질문·공개일만) |
 | `build.py` | `python build.py build`로 `docs/`를 다시 만든다. `docs/`를 손으로 고치지 않는다. `python build.py import <묶음.json>`은 회사(연재부) 정본 묶음에서 글을 가져온다 |
 | `assets/` | style.css, favicon.svg (build 때 docs로 복사) |
-| `docs/` | 빌드 결과(공개할 때 GitHub Pages가 여기를 보여 준다) |
+| `docs/` | 빌드 결과. 이 폴더를 그대로 Cloudflare Pages에 올린다 |
 
 ## 배포
-- 지금은 **비공개 저장소**라 GitHub Pages가 켜져 있지 않다(무료 요금제는 비공개 저장소 Pages 불가). 공개는 질문 50개쯤 모였을 때(휴먼쌤 2026-10-15) — 그때 휴먼쌤이 저장소를 public으로 바꾸고 Pages(main `/docs`)를 켠다. 도메인 aiparentbook.com 연결(CNAME)도 그때.
-- 그 전에는 화면 확인을 로컬로: `python build.py build` 뒤 `cd docs && python3 -m http.server 8765`.
+- 2026-10-20부터 **공개 중**: https://aiparentbook.com (www도, HTTPS). Cloudflare Pages 프로젝트 `humanssaem-aiparentbook`(https://humanssaem-aiparentbook.pages.dev)에 `docs/`를 직접 올린다(Git 연결 없음). 도메인 DNS는 Cloudflare가 맡는다(10-20 카페24에서 네임서버를 Cloudflare로 바꿈).
+- 같은 날 GitHub 계정이 정지되어 GitHub Pages 주소(…github.io/aiparentbook/)는 열리지 않는다. 옛 임시 주소 humanssaem-apps.pages.dev/aiparentbook/ 은 새 주소로 넘어간다. GitHub이 풀린 뒤 어디로 올릴지는 휴먼쌤이 정한다.
+- 올리기는 회사 노트북 창만, 휴먼쌤이 "올려"라고 할 때: build 뒤 `wrangler pages deploy docs --project-name humanssaem-aiparentbook --branch main`. 올릴 때마다 사이트 전체가 그 폴더 내용으로 바뀐다. 클라우드 세션은 PR까지만 한다.
+- 저장소는 공개 상태다(10-20 휴먼쌤) — 커밋하는 것은 누구에게나 보인다.
+- 화면 확인은 로컬로: `python build.py build` 뒤 `cd docs && python3 -m http.server 8765`.
 
 ## 일하는 순서
 - 시작할 때 이 파일 맨 아래 **'클라우드·PC 인수인계'** 절을 먼저 읽는다. `main`을 새로 받은 뒤 시작한다.
@@ -32,6 +35,7 @@
 - 새 기능·화면 바꾸기는 먼저 휴먼쌤에게 묻는다.
 
 ## 클라우드·PC 인수인계 (시작할 때 읽고, 끝낼 때 고친다)
-휴먼쌤 PC에도 이 저장소 사본이 있다. PC 쪽은 작업 전에 GitHub에서 먼저 받아오므로, 여기서 고친 것은 `main`에 합쳐지기만 하면 된다. 공개 저장소가 될 수 있으니 이 절에도 비밀·개인 정보는 쓰지 않는다.
-- 마지막 작업(2026-10-19, 클라우드 개발 세션): 첫 화면·글 화면을 시안 E3 '오늘 해 볼 한 가지'로 바꿈(휴먼쌤이 시안 D~H, E1~E5 중 E3 고름). 첫 화면 = 새 질문 노란 카드(결론 첫 문장·오늘 해 볼 한 가지·ACT 3단계) + 곧 올라올 질문 가로 넘기기 + 상황으로 찾기(상황 타일 4개, 10-20 휴먼쌤 요청으로 다시 넣음) + 나이별 '질문 모두 보기'. 글 화면 = 질문·결론을 노란 카드에. 노란 카드 제목 '새로 올라온 질문'은 휴먼쌤 확인(10-20). 그 전(10-16, PC 개발부): 저장소를 GitHub(비공개)에 처음 올리고 이 파일을 클라우드용 안내로 늘림.
-- 남은 일: ① 질문002~050 목록·원고(노트북에 있음)를 가져오기 → build ② 네프콘 글 주소(`nepcon_url`) 채우기 ③ AI 도움 표시 문구 ④ 404 화면이 CSS를 `/`부터 찾아 github.io 하위 주소에서 깨짐(도메인 연결 땐 괜찮음) ⑤ 공개 때(질문 50개쯤) public 전환·Pages·도메인 CNAME(휴먼쌤).
+휴먼쌤 PC에도 이 저장소 사본이 있다. PC 쪽은 작업 전에 GitHub에서 먼저 받아오므로, 여기서 고친 것은 `main`에 합쳐지기만 하면 된다. 공개 저장소라 이 절에도 비밀·개인 정보는 쓰지 않는다.
+- 마지막 작업(2026-10-20, 회사 노트북 창): 휴먼쌤이 PR #1을 합치고 저장소 공개·GitHub Pages를 켬 → 같은 날 GitHub 계정 정지로 Pages가 내려가 Cloudflare Pages(`humanssaem-aiparentbook`)로 옮기고 aiparentbook.com·www를 연결(HTTPS 확인). 화면·글은 PR #1 그대로. 이 내용은 클라우드 세션이 PR #2로 적던 것(GitHub 정지로 노트북에 없음)을 대신한다.
+- 그 전 작업(2026-10-19~20, 클라우드 개발 세션): 첫 화면·글 화면을 시안 E3 '오늘 해 볼 한 가지'로 바꿈(휴먼쌤이 시안 D~H, E1~E5 중 E3 고름). 첫 화면 = 새 질문 노란 카드(결론 첫 문장·오늘 해 볼 한 가지·ACT 3단계) + 곧 올라올 질문 가로 넘기기 + 상황으로 찾기(상황 타일 4개, 10-20 휴먼쌤 요청으로 다시 넣음) + 나이별 '질문 모두 보기'. 글 화면 = 질문·결론을 노란 카드에. 노란 카드 제목 '새로 올라온 질문'은 휴먼쌤 확인(10-20). 그 전(10-16, PC 개발부): 저장소를 GitHub(비공개)에 처음 올리고 이 파일을 클라우드용 안내로 늘림.
+- 남은 일: ① 질문002~050 목록·원고(노트북에 있음)를 가져오기 → build ② 네프콘 글 주소(`nepcon_url`) 채우기 ③ AI 도움 표시 문구 ④ GitHub이 풀리면 이 커밋을 push하고 PR #2·남은 브랜치 `claude/e3-home-redesign` 정리. (404 화면 CSS 문제는 도메인 루트로 옮겨 사라짐.)
