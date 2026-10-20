@@ -178,12 +178,23 @@ def build_index(cfg, notes):
         f'<a class="card" href="q/{no}/"><small>{no} · {fmt_date(cfg["notes"][no]["release"])}</small><b>{inline(notes[no]["question"])}</b></a>'
         for no in upcoming if no != top)
     next_sec = f'<section class="next-sec"><h2>곧 올라올 질문</h2><div class="next">{cards}</div></section>' if cards else ""
+    tiles = []
+    for s in cfg["situations"]:
+        nos = sorted(no for no, c in cfg["notes"].items() if c["situation"] == s["id"] and no in notes)
+        if not nos:
+            continue
+        href = f"q/{nos[0]}/" if len(nos) == 1 else f"s/{s['id']}/"
+        live_nos = [no for no in nos if cfg["notes"][no].get("published")]
+        sub = " · ".join(live_nos) if live_nos else "준비 중"
+        tiles.append(f'<a class="tile" href="{href}"><b>{html.escape(s["label"])}</b><small>{sub}</small></a>')
+    sit_sec = f'<section class="sit-sec"><h2>상황으로 찾기</h2><div class="tiles">{"".join(tiles)}</div></section>' if tiles else ""
     age_btns = "".join(
         f'<button type="button" data-age="{a["id"]}" aria-pressed="{"true" if a["id"] == "elementary" else "false"}">{a["label"]}</button>'
         for a in cfg["ages"])
     rows = "".join(note_card_html("", notes[no], cfg["notes"][no], cfg) for no in sorted(cfg["notes"]) if no in notes)
     body = f"""{hero}
 {next_sec}
+{sit_sec}
 <section class="all" aria-labelledby="all-h"><h2 id="all-h">질문 모두 보기 <small>{len([no for no in cfg["notes"] if no in notes])}개</small></h2>
 <div class="seg" id="ages" role="group" aria-label="아이 나이">{age_btns}</div>
 <div class="rows" id="rows">{rows}</div>

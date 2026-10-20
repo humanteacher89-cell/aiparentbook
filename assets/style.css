@@ -47,14 +47,18 @@ mark{background:var(--sun);color:#1C1A12;padding:0 2px;border-radius:3px}
 .hero mark{background:#fff}
 
 /* 첫 화면 */
-.next-sec,.all{display:grid;gap:10px}
-.next-sec h2,.all h2{font-size:18px;font-weight:900;padding-top:12px}
+.next-sec,.sit-sec,.all{display:grid;gap:10px}
+.next-sec h2,.sit-sec h2,.all h2{font-size:18px;font-weight:900;padding-top:12px}
 .all h2 small{font-size:13px;font-weight:500;color:var(--soft);margin-left:4px}
 .next{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;margin-right:-16px;padding:0 16px 4px 0;scrollbar-width:none}
 .next::-webkit-scrollbar{display:none}
 .card{flex:none;width:210px;scroll-snap-align:start;border:2px solid var(--ink);border-radius:18px;padding:14px;display:grid;gap:14px;align-content:space-between;min-height:140px;text-decoration:none}
 .card small{font-size:12px;font-weight:700;color:var(--soft)}
 .card b{font-size:16px;line-height:1.45}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:10px;min-height:104px;align-content:space-between;text-decoration:none}
+.tile b{font-size:15px;line-height:1.4}
+.tile small{font-size:12px;color:var(--soft)}
 .seg{display:flex;gap:6px}
 .seg button{flex:1;font:inherit;font-size:15px;font-weight:700;border:2px solid var(--ink);border-radius:999px;padding:8px 0;background:transparent;color:var(--ink);cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
@@ -93,4 +97,4 @@ details ol{margin:8px 0 0;padding-left:22px}
 .paid .btn.off{background:#3A3626;color:#CFC8B0;font-weight:500}
 .paid .wb{margin:0;font-size:13px;opacity:.8}
 .back{font-size:14px;color:var(--accent);font-weight:700}
-@media (min-width:700px){.hero h1{font-size:32px}.q{font-size:28px}}
+@media (min-width:700px){.hero h1{font-size:32px}.q{font-size:28px}.tiles{grid-template-columns:repeat(4,1fr)}}
