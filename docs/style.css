@@ -79,6 +79,9 @@ section[id]{scroll-margin-top:64px}
 .ans .big{font-size:20px;font-weight:900;line-height:1.4}
 .ans p,.ans ol{margin:0}
 .ans ol{padding-left:22px}
+.shorts{display:grid;gap:8px}
+.shorts h2{font-size:18px;font-weight:900}
+.shorts video{display:block;width:100%;max-width:360px;height:auto;aspect-ratio:9/16;margin:0 auto;border-radius:18px;background:#1C1A12}
 .evs{display:grid;gap:8px}
 .evs h2,.paid h2{font-size:18px;font-weight:900}
 details{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-size:15px}

@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data" / "notes.json"
 OUT = ROOT / "docs"
 ASSETS = ROOT / "assets"
+SHORTS = ROOT / "shorts"
 WEEK = "월화수목금토일"
 
 
@@ -259,9 +260,16 @@ def build_note(cfg, n, c):
         cta = f'<a class="btn" href="{html.escape(c["nepcon_url"])}" rel="noopener">네이버 프리미엄콘텐츠에서 활동지 받기</a>'
     else:
         cta = '<p class="btn off">네이버 프리미엄콘텐츠 단품 · 링크 준비 중</p>'
+    # 쇼츠(H2)가 확정된 글만: shorts/NNN.mp4 + NNN.jpg(첫 화면)
+    shorts = ""
+    if c.get("shorts"):
+        shorts = (f'<section class="shorts" aria-labelledby="shorts-h"><h2 id="shorts-h">1분 쇼츠로 보기</h2>'
+                  f'<video controls playsinline preload="none" poster="{prefix}shorts/{n["no"]}.jpg" width="720" height="1280">'
+                  f'<source src="{prefix}shorts/{n["no"]}.mp4" type="video/mp4"></video></section>')
     wb = '<p class="wb">이 실천 자료는 『어린이를 위한 AI시대 생각주도력 워크북(기초편)』에도 묶여 나올 예정이에요.</p>' if n.get("workbook") else ""
     body = f"""<section class="hero" id="conclusion">{no_mark}{crumb}<h1>{inline(n['question'])}</h1>
 <div class="hero-ans"><h2 class="sr">결론</h2><b>{html.escape(big)}</b>{''.join(concl_html)}</div>{today}</section>
+{shorts}
 <nav class="tabs" aria-label="이 글의 차례"><a href="#conclusion">결론</a><a href="#evidence">근거</a><a href="#practice">실천</a></nav>
 <section class="evs" id="evidence"><h2>근거</h2>{''.join(ev_html)}</section>
 <section class="paid" id="practice"><div class="act" aria-hidden="true">{ACT}</div><h2>오늘 저녁 바로 해 보려면</h2><p class="kitname">휴먼쌤 ACT 3단계 · 활동지 「{html.escape(n['material'])}」 PDF {n['pages']}쪽</p><ul>{kit}</ul>{cta}{wb}</section>
@@ -298,6 +306,8 @@ def cmd_build():
     OUT.mkdir(exist_ok=True)
     for a in ASSETS.iterdir():
         shutil.copy(a, OUT / a.name)
+    if SHORTS.exists():
+        shutil.copytree(SHORTS, OUT / "shorts")
     (OUT / ".nojekyll").write_text("", encoding="utf-8")
 
     def write(rel, text):
