@@ -6,7 +6,7 @@
 - 글 문장은 연재부 정본 그대로 쓴다(손으로 옮기지 않는다).
 - config.json에서 published가 false인 글은 질문·공개일만 가져온다(본문은 저장소에 넣지 않는다).
 - 모든 링크는 상대 경로라 github.io 하위 주소와 aiparentbook.com 루트 양쪽에서 돈다.
-- 화면은 시안 C '근거 사전'(2026-10-31 휴먼쌤 선택).
+- 화면은 시안 C '근거 사전'(2026-10-31 휴먼쌤 선택), 글꼴 · 글씨 크기는 휴먼티처닷컴 가독성을 따름(11-01).
 """
 import html
 import json
@@ -136,7 +136,6 @@ ICON_PATHS = {
     "search": '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/>',
     "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
     "down": '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
-    "chev": '<path d="M6 9l6 6 6-6"/>',
     "homework": '<path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/>',
     "start": '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
     "trust": '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
@@ -175,7 +174,7 @@ def page(prefix, title, desc, body):
 <link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Hahmlet:wght@600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
 <link rel="stylesheet" href="{prefix}style.css">
 </head>
 <body>
@@ -265,7 +264,7 @@ def build_index(cfg, notes):
         n_live = sum(1 for no in nos if cfg["notes"][no].get("published"))
         st = f'<span class="n">{n_live}편</span>' if n_live else '<span class="z">정리 중</span>'
         on = ' class="on"' if n_live else ""
-        idx.append(f'<a{on} href="{href}">{icon(s["id"])}<span class="t">{html.escape(s["label"])}</span>{st}</a>')
+        idx.append(f'<a{on} href="{href}"><span class="iw">{icon(s["id"])}</span><span class="t">{html.escape(s["label"])}</span>{st}</a>')
     age_btns = "".join(
         f'<button type="button" data-age="{a["id"]}" aria-pressed="{"true" if a["id"] == "elementary" else "false"}">{a["label"]}</button>'
         for a in cfg["ages"])
@@ -296,8 +295,8 @@ def build_index(cfg, notes):
                 "숙제, 첫 사용, 계정, AI 답 믿기까지. 아이와 AI 사이에서 부모님이 실제로 묻는 질문에 결론과 근거로 답합니다.", body)
 
 
-def ev_group_html(i, title, parts):
-    """근거 한 묶음을 카드로. 형광펜 문단은 강조 상자, '(단, …)' 줄은 작은 글씨로 뗀다(문장은 그대로)."""
+def ev_group_html(title, parts):
+    """근거 한 묶음을 카드로(접지 않는다). 형광펜 문단은 강조 상자, '(단, …)' 줄은 작은 글씨로 뗀다(문장은 그대로)."""
     m = re.match(r"(근거\s*\S+)\s*[-–—]\s*(.+)$", title)
     key, text = (m.group(1), m.group(2)) if m else ("", title)
     body = []
@@ -311,8 +310,7 @@ def ev_group_html(i, title, parts):
         else:
             body.append(p)
     k = f'<span class="k">{html.escape(key)}</span>' if key else ""
-    return (f'<details class="card ev"{" open" if i == 0 else ""}><summary>{k}<b>{html.escape(text)}</b>{icon("chev")}</summary>'
-            f'<div class="body">{"".join(body)}</div></details>')
+    return f'<article class="card ev"><h3>{k}{html.escape(text)}</h3><div class="body">{"".join(body)}</div></article>'
 
 
 def kit_item(k):
@@ -339,7 +337,7 @@ def build_note(cfg, n, c):
     big, concl_html, today = split_conclusion(n)
     today = f'<div class="today"><b>오늘 해 볼 한 가지</b>{today}</div>' if today else ""
     groups, quotes, unknown, refs, loose = parse_evidence(n)
-    ev = [ev_group_html(i, t, parts) for i, (t, parts) in enumerate(groups)]
+    ev = [ev_group_html(t, parts) for t, parts in groups]
     ev += [f'<div class="card unk"><b>아직 모르는 것</b><p>{u}</p></div>' for u in unknown]
     ev += [f'<div class="card prose">{b}</div>' for b in loose]
     if quotes:
