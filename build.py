@@ -1,18 +1,18 @@
 """AI시대 부모백과(aiparentbook.com) 정적 사이트 만들기.
 
   python build.py import <bundle.json>   연재부 묶음에서 공개해도 되는 글만 data/notes.json으로 가져온다
-  python build.py build                  data/notes.json + config.json -> docs/ (GitHub Pages가 보는 폴더)
+  python build.py build                  data/notes.json + config.json -> docs/ (Cloudflare Pages에 올리는 폴더)
 
 - 글 문장은 연재부 정본 그대로 쓴다(손으로 옮기지 않는다).
 - config.json에서 published가 false인 글은 질문·공개일만 가져온다(본문은 저장소에 넣지 않는다).
 - 모든 링크는 상대 경로라 github.io 하위 주소와 aiparentbook.com 루트 양쪽에서 돈다.
+- 화면은 시안 C '근거 사전'(2026-10-31 휴먼쌤 선택).
 """
 import html
 import json
 import re
 import shutil
 import sys
-from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -20,7 +20,6 @@ DATA = ROOT / "data" / "notes.json"
 OUT = ROOT / "docs"
 ASSETS = ROOT / "assets"
 SHORTS = ROOT / "shorts"
-WEEK = "월화수목금토일"
 
 
 def load_config():
@@ -59,6 +58,11 @@ def inline(s):
     return re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
 
 
+def plain(s):
+    """검색용 글자: 강조 기호를 뺀 소문자."""
+    return re.sub(r"[*=]", "", s).lower()
+
+
 def md_blocks(text):
     """빈 줄로 나눈 덩어리 -> html. 1. 로 시작하는 줄 묶음은 번호 목록."""
     out = []
@@ -80,11 +84,6 @@ def lead_rest(block, head):
     return inline(rest)
 
 
-def fmt_date(iso):
-    d = date.fromisoformat(iso)
-    return f"{d.month}월 {d.day}일({WEEK[d.weekday()]})"
-
-
 def split_conclusion(n):
     """결론 첫 문장(큰 글씨), 나머지 문단들, '오늘 해 볼 한 가지' 문장. 모두 정본 그대로."""
     raw = n["conclusion"].strip()
@@ -99,18 +98,65 @@ def split_conclusion(n):
     return big, paras, today
 
 
-ACT = '<span><i>A</i>질문하기</span><span><i>C</i>확인하기</span><span><i>T</i>실천하기</span>'
+def parse_evidence(n):
+    """근거 글을 정본 그대로 나눈다: 근거 묶음(제목, 덩어리들) · 인용 · 아직 모르는 것 · 참고자료 줄 · 묶음 밖 덩어리."""
+    groups, quotes, unknown, refs, loose = [], [], [], [], []
+    cur = None
+    for b in md_blocks(n["evidence"]):
+        if isinstance(b, tuple) and b[0] == "unknown":
+            cur = None
+            unknown.append(lead_rest(b[1], "**아직 모르는 것**"))
+        elif isinstance(b, tuple) and b[0] == "quote":
+            cur = None
+            quotes.append(b[1])
+        elif isinstance(b, str):
+            head = re.match(r"<p><b>([^<]+)</b>(?:<br>|\s+)?(.*)</p>$", b, re.S)
+            if head and head.group(1).strip() == "참고자료":
+                cur = None
+                refs += [l.strip() for l in head.group(2).split("<br>") if l.strip()]
+            elif head:
+                cur = (head.group(1), [f"<p>{head.group(2).strip()}</p>"] if head.group(2).strip() else [])
+                groups.append(cur)
+            elif cur:
+                cur[1].append(b)
+            else:
+                loose.append(b)
+    return groups, quotes, unknown, refs, loose
 
 
-def short_date(iso):
-    if not iso:
-        return "준비 중"
-    d = date.fromisoformat(iso)
-    return f"{d.month}.{d.day}"
+def ref_short(r):
+    """'Bastani, H. 외 (2025). …' -> 'Bastani 외 2025' (못 읽으면 앞부분만)."""
+    t = html.unescape(re.sub(r"<[^>]+>", "", r))
+    m = re.match(r"\s*([^,(]+?)\s*(?:,[^(]*?)?\s*(외)?\s*\((\d{4})\)", t)
+    return f"{m.group(1).strip()}{' 외' if m.group(2) else ''} {m.group(3)}" if m else t[:28]
+
+
+# 선 아이콘(24칸). 상황 id와 같은 이름은 상황별 색인에 쓴다
+ICON_PATHS = {
+    "search": '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/>',
+    "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    "down": '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
+    "chev": '<path d="M6 9l6 6 6-6"/>',
+    "homework": '<path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/>',
+    "start": '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+    "trust": '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+    "wrong": '<path d="M12 3l10 18H2L12 3zM12 10v4M12 17.5v.5"/>',
+    "ask": '<path d="M4 5h16v11H9l-5 4V5z"/><path d="M9 10.5h.01M12 10.5h.01M15 10.5h.01"/>',
+    "practice": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.5"/>',
+    "heart": '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+    "safety": '<path d="M12 3l8 3v6c0 4.5-3.4 8-8 9-4.6-1-8-4.5-8-9V6l8-3z"/>',
+    "school": '<path d="M2 10l10-5 10 5-10 5-10-5z"/><path d="M6 12v5c3.5 2.4 8.5 2.4 12 0v-5"/>',
+    "age": '<path d="M5 20v-6M10 20V10M15 20V6M20 20V3"/>',
+    "future": '<path d="M12 21v-9M12 12c0-4-3-6.5-7-6.5 0 4 3 6.5 7 6.5zM12 10c0-3 2.5-5.5 6.5-5.5 0 3.5-2.5 5.5-6.5 5.5z"/>',
+}
+
+
+def icon(name):
+    return f'<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">{ICON_PATHS.get(name, "")}</svg>'
 
 
 # ---------------------------------------------------------------- page shell
-def page(prefix, title, desc, body, canonical=""):
+def page(prefix, title, desc, body):
     t = html.escape(title)
     d = html.escape(desc)
     return f"""<!doctype html>
@@ -124,142 +170,189 @@ def page(prefix, title, desc, body, canonical=""):
 <meta property="og:description" content="{d}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AI시대 부모백과">
-<meta name="theme-color" content="#FFFDF6">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C1A2C" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Hahmlet:wght@600;700&display=swap">
 <link rel="stylesheet" href="{prefix}style.css">
 </head>
 <body>
-<header class="bar"><a class="logo" href="{prefix}">AI시대 <b>부모백과</b></a><a class="by" href="{prefix}about/">휴먼쌤</a></header>
-<main class="pad">
+<header class="bar"><div class="in"><a class="logo" href="{prefix or './'}">AI시대 부모백과</a>
+<nav class="nav" aria-label="바로 가기"><a class="ico" href="{prefix}#search" aria-label="질문 찾기">{icon("search")}</a><a class="pill" href="{prefix}#questions">질문 목록</a></nav></div></header>
+<main>
 {body}
 </main>
-<footer class="foot"><p>AI시대 부모백과 · 질문에 답하는 사람 휴먼쌤 김수현</p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></footer>
+<footer class="foot"><div class="in"><span class="logo">AI시대 부모백과</span><p>질문에 답하는 사람 휴먼쌤 김수현 · <a href="{prefix}about/">소개</a></p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></div></footer>
 </body>
 </html>
 """
 
 
-# ---------------------------------------------------------------- pages
-def note_card_html(prefix, n, c, cfg):
-    href = f"{prefix}q/{n['no']}/"
-    if c.get("published"):
-        return f'<a class="row" href="{href}" data-ages="{" ".join(c["ages"])}"><b>{inline(n["question"])}</b><span>{n["no"]}</span></a>'
-    return f'<a class="row soon" href="{href}" data-ages="{" ".join(c["ages"])}"><b>{inline(n["question"])}</b><span>{short_date(c["release"])}</span></a>'
-
-
+# ---------------------------------------------------------------- pieces
 def age_label(cfg, c):
     return " · ".join(a["label"] for a in cfg["ages"] if a["id"] in c["ages"])
 
 
-def build_hero(cfg, n, c):
+def sit_of(cfg, c):
+    return next(s for s in cfg["situations"] if s["id"] == c["situation"])
+
+
+def row_html(prefix, cfg, n, c):
+    """질문 한 줄. data-text는 첫 화면 찾기 칸이 보는 글자(질문 · 상황 · 나이)."""
+    live = c.get("published")
+    text = plain(" ".join([n["question"], sit_of(cfg, c)["label"], age_label(cfg, c)]))
+    return (f'<a class="row{" live" if live else ""}" href="{prefix}q/{n["no"]}/" data-ages="{" ".join(c["ages"])}" '
+            f'data-text="{html.escape(text)}"><span class="no">{n["no"]}</span><b>{inline(n["question"])}</b>'
+            f'<span class="st">{"읽기" if live else "정리 중"}</span></a>')
+
+
+def build_latest(cfg, n, c):
+    """가장 최근에 공개한 글 한 장: 결론 첫 문단과 참고자료 이름."""
+    big, paras, _ = split_conclusion(n)
+    groups, _, _, refs, _ = parse_evidence(n)
+    first = re.sub(r"^<p>|</p>$", "", paras[0]) if paras else ""
+    ev = (f'<div class="refs-s">{"".join(f"<span>{html.escape(ref_short(r))}</span>" for r in refs)}</div>'
+          if refs else f"근거 {len(groups)}가지")
     href = f"q/{n['no']}/"
-    if c.get("published"):
-        big, paras, today = split_conclusion(n)
-        tag = f"새로 올라온 질문 · {age_label(cfg, c)}"
-        ans = f'<div class="hero-ans"><b>{html.escape(big)}</b>{paras[0] if paras else ""}</div>'
-        todo = f'<div class="todo"><b>오늘 해 볼 한 가지</b>{today}</div>' if today else ""
-        rest = f'{todo}<a class="act" href="{href}#practice" aria-label="휴먼쌤 ACT 실천 3단계 보기">{ACT}</a><a class="go" href="{href}">답과 근거 읽기</a>'
-    else:
-        tag = f"곧 올라올 질문 · {age_label(cfg, c)}"
-        ans = f'<div class="hero-ans"><b>{fmt_date(c["release"])} 공개</b><p>휴먼쌤이 결론과 근거를 정리하고 있어요.</p></div>'
-        rest = ""
-    return f"""<section class="hero" aria-labelledby="hero-q"><span class="no" aria-hidden="true">{n['no']}</span><p class="tag">{tag}</p>
-<h1 id="hero-q"><a href="{href}">{inline(n['question'])}</a></h1>{ans}{rest}</section>"""
+    return f"""<section aria-labelledby="latest-h"><h2 id="latest-h">최근 정리된 질문</h2>
+<article class="card latest"><p class="mt"><span class="tag">{age_label(cfg, c)} · {html.escape(sit_of(cfg, c)["label"])}</span><span class="qno">질문 {n['no']}</span></p>
+<h3><a href="{href}">{inline(n['question'])}</a></h3>
+<dl><div><dt>결론</dt><dd><b>{html.escape(big)}</b> {first}</dd></div><div><dt>근거</dt><dd>{ev}</dd></div></dl>
+<a class="more" href="{href}">결론 · 근거 · 실천 읽기{icon("arrow")}</a></article></section>"""
 
 
+HOME_JS = """<script>
+(function(){var KEY='apb-age',box=document.getElementById('rows'),rows=[].slice.call(box.querySelectorAll('.row')),btns=[].slice.call(document.querySelectorAll('#ages button')),
+empty=document.getElementById('empty'),q=document.getElementById('q'),hint=document.getElementById('hint'),hintT=document.getElementById('hint-t'),list=document.getElementById('questions'),
+more=document.getElementById('more'),LIMIT=12,open=false,
+age='elementary',EMPTY_AGE=empty.textContent,EMPTY_Q='찾는 질문이 아직 없어요. 다른 말로 찾아보세요.';
+function show(){var term=q.value.trim().toLowerCase(),words=term?term.split(/\\s+/):[],shown=0;
+btns.forEach(function(b){b.setAttribute('aria-pressed',!words.length&&b.dataset.age===age?'true':'false')});
+rows.forEach(function(t){var ok=words.length?words.every(function(w){return t.dataset.text.indexOf(w)>-1}):(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1;if(ok)shown++;t.hidden=!ok||(!words.length&&!open&&shown>LIMIT)});
+box.hidden=!shown;empty.hidden=!!shown;empty.textContent=words.length?EMPTY_Q:EMPTY_AGE;hint.hidden=!words.length;if(words.length)hintT.textContent='"'+q.value.trim()+'" 찾은 질문 '+shown+'개';
+more.hidden=!!words.length||open||shown<=LIMIT;more.textContent='질문 '+(shown-LIMIT)+'개 더 보기';}
+function go(){show();list.scrollIntoView({behavior:'smooth',block:'start'})}
+btns.forEach(function(b){b.addEventListener('click',function(){age=b.dataset.age;q.value='';open=false;try{localStorage.setItem(KEY,age)}catch(e){}show()})});
+more.addEventListener('click',function(){open=true;show()});
+document.getElementById('search').addEventListener('submit',function(e){e.preventDefault();go()});
+q.addEventListener('input',show);
+[].slice.call(document.querySelectorAll('.chips button')).forEach(function(b){b.addEventListener('click',function(){q.value=b.dataset.q;go()})});
+document.getElementById('clear').addEventListener('click',function(){q.value='';show();q.focus()});
+try{age=localStorage.getItem(KEY)||age}catch(e){}show();})();
+</script>"""
+
+
+# ---------------------------------------------------------------- pages
 def build_index(cfg, notes):
-    live = sorted([no for no, c in cfg["notes"].items() if c.get("published") and no in notes],
+    have = [no for no in sorted(cfg["notes"]) if no in notes]
+    live = sorted([no for no in have if cfg["notes"][no].get("published")],
                   key=lambda k: cfg["notes"][k]["release"], reverse=True)
-    # 공개일이 정해진 글만 '곧 올라올 질문'에 (공개일이 비어 있으면 목록에만 '준비 중'으로)
-    upcoming = sorted([no for no, c in cfg["notes"].items() if not c.get("published") and c.get("release") and no in notes],
-                      key=lambda k: cfg["notes"][k]["release"])
-    top = (live or upcoming)[0]
-    hero = build_hero(cfg, notes[top], cfg["notes"][top])
-    cards = "".join(
-        f'<a class="card" href="q/{no}/"><small>{no} · {fmt_date(cfg["notes"][no]["release"])}</small><b>{inline(notes[no]["question"])}</b></a>'
-        for no in upcoming if no != top)
-    next_sec = f'<section class="next-sec"><h2>곧 올라올 질문</h2><div class="next">{cards}</div></section>' if cards else ""
-    tiles = []
+    total = len(have)
+    pct = max(4, round(len(live) * 100 / total)) if total else 0
+    go = f'<a class="go" href="q/{live[0]}/">공개된 질문 읽기{icon("arrow")}</a>' if live else ""
+    progress = f"""<section class="progress" aria-label="정리 현황"><p class="pt">질문 {total}개를 차례로 정리하고 있어요</p>
+<p class="pn"><span>공개 {len(live)}편</span><span>정리 중 {total - len(live)}편</span></p>
+<div class="pb" aria-hidden="true"><i style="width:{pct}%"></i></div>{go}</section>"""
+    latest = build_latest(cfg, notes[live[0]], cfg["notes"][live[0]]) if live else ""
+    idx = []
     for s in cfg["situations"]:
-        nos = sorted(no for no, c in cfg["notes"].items() if c["situation"] == s["id"] and no in notes)
+        nos = [no for no in have if cfg["notes"][no]["situation"] == s["id"]]
         if not nos:
             continue
         href = f"q/{nos[0]}/" if len(nos) == 1 else f"s/{s['id']}/"
-        live_nos = [no for no in nos if cfg["notes"][no].get("published")]
-        sub = " · ".join(live_nos) if live_nos else "준비 중"
-        tiles.append(f'<a class="tile" href="{href}"><b>{html.escape(s["label"])}</b><small>{sub}</small></a>')
-    sit_sec = f'<section class="sit-sec"><h2>상황으로 찾기</h2><div class="tiles">{"".join(tiles)}</div></section>' if tiles else ""
+        n_live = sum(1 for no in nos if cfg["notes"][no].get("published"))
+        st = f'<span class="n">{n_live}편</span>' if n_live else '<span class="z">정리 중</span>'
+        on = ' class="on"' if n_live else ""
+        idx.append(f'<a{on} href="{href}">{icon(s["id"])}<span class="t">{html.escape(s["label"])}</span>{st}</a>')
     age_btns = "".join(
         f'<button type="button" data-age="{a["id"]}" aria-pressed="{"true" if a["id"] == "elementary" else "false"}">{a["label"]}</button>'
         for a in cfg["ages"])
-    rows = "".join(note_card_html("", notes[no], cfg["notes"][no], cfg) for no in sorted(cfg["notes"]) if no in notes)
-    body = f"""{hero}
-{next_sec}
-{sit_sec}
-<section class="all" aria-labelledby="all-h"><h2 id="all-h">질문 모두 보기 <small>{len([no for no in cfg["notes"] if no in notes])}개</small></h2>
+    rows = "".join(row_html("", cfg, notes[no], cfg["notes"][no]) for no in have)
+    chips = "".join(f'<button type="button" data-q="{w}">{w}</button>' for w in ("숙제", "챗GPT", "개인정보", "학교"))
+    body = f"""<section class="top"><div class="hero">
+<h1>AI 육아,<br>근거로 확인하세요</h1>
+<p class="lede">부모님이 실제로 묻는 질문을 골라 <b>결론 · 근거 · 실천</b>을 한 쪽에 정리합니다.</p>
+<form class="search" id="search" role="search"><label class="sr" for="q">질문 찾기</label><input id="q" type="search" placeholder="무엇이 궁금하세요?" autocomplete="off"><button type="submit" aria-label="찾기">{icon("search")}</button></form>
+<div class="chips"><span>자주 찾는 말</span>{chips}</div>
+</div></section>
+<div class="wrap">
+{progress}
+{latest}
+<section id="situations" aria-labelledby="sit-h"><div class="sh"><h2 id="sit-h">상황별 색인</h2><span>{len(idx)}가지 상황</span></div>
+<nav class="card idx" aria-labelledby="sit-h">{"".join(idx)}</nav></section>
+<section id="questions" aria-labelledby="all-h"><div class="sh"><h2 id="all-h">질문 모두 보기</h2><span>{total}개</span></div>
 <div class="seg" id="ages" role="group" aria-label="아이 나이">{age_btns}</div>
-<div class="rows" id="rows">{rows}</div>
+<p class="hint" id="hint" hidden><span id="hint-t"></span><button type="button" id="clear">지우기</button></p>
+<div class="card rows" id="rows">{rows}</div>
+<button type="button" class="more-btn" id="more" hidden>더 보기</button>
 <p class="empty" id="empty" hidden>이 나이에 맞는 질문은 아직 없어요. 지금은 초등 자녀를 둔 부모님 질문부터 답하고 있어요.</p></section>
-<script>
-(function(){{var KEY='apb-age',btns=[].slice.call(document.querySelectorAll('#ages button')),rows=[].slice.call(document.querySelectorAll('#rows .row')),empty=document.getElementById('empty');
-function set(age){{var shown=0;btns.forEach(function(b){{b.setAttribute('aria-pressed',b.dataset.age===age?'true':'false')}});rows.forEach(function(t){{var ok=(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1;t.hidden=!ok;if(ok)shown++}});empty.hidden=shown>0;try{{localStorage.setItem(KEY,age)}}catch(e){{}}}}
-btns.forEach(function(b){{b.addEventListener('click',function(){{set(b.dataset.age)}})}});var saved=null;try{{saved=localStorage.getItem(KEY)}}catch(e){{}}set(saved||'elementary');}})();
-</script>"""
+<section aria-labelledby="how-h"><h2 id="how-h">한 편은 이렇게 정리해요</h2>
+<ol class="steps"><li class="card"><i>1</i><b>질문</b><span>부모님이 실제로 묻는 질문</span></li><li class="card"><i>2</i><b>결론</b><span>먼저 한 줄로 답해요</span></li><li class="card"><i>3</i><b>근거</b><span>연구와 자료로 확인해요</span></li><li class="card"><i>4</i><b>실천</b><span>오늘 저녁 해 볼 ACT 활동</span></li></ol></section>
+</div>
+{HOME_JS}"""
     return page("", "AI시대 부모백과 — 부모의 질문에 답하는 AI 교육 가이드",
                 "숙제, 첫 사용, 계정, AI 답 믿기까지. 아이와 AI 사이에서 부모님이 실제로 묻는 질문에 결론과 근거로 답합니다.", body)
 
 
+def ev_group_html(i, title, parts):
+    """근거 한 묶음을 카드로. 형광펜 문단은 강조 상자, '(단, …)' 줄은 작은 글씨로 뗀다(문장은 그대로)."""
+    m = re.match(r"(근거\s*\S+)\s*[-–—]\s*(.+)$", title)
+    key, text = (m.group(1), m.group(2)) if m else ("", title)
+    body = []
+    for p in parts:
+        if "<mark>" in p and p.startswith("<p>"):
+            lines = re.sub(r"^<p>|</p>$", "", p).split("<br>")
+            take = [l for l in lines if not l.startswith("(단")]
+            note = [l for l in lines if l.startswith("(단")]
+            body.append(f'<div class="take"><p>{"<br>".join(take)}</p></div>')
+            body += [f'<p class="note">{l}</p>' for l in note]
+        else:
+            body.append(p)
+    k = f'<span class="k">{html.escape(key)}</span>' if key else ""
+    return (f'<details class="card ev"{" open" if i == 0 else ""}><summary>{k}<b>{html.escape(text)}</b>{icon("chev")}</summary>'
+            f'<div class="body">{"".join(body)}</div></details>')
+
+
+def kit_item(k):
+    """'**A (Ask) 질문하기** — …' 한 줄을 글자 · 이름 · 설명으로 나눠 보여 준다."""
+    m = re.match(r"\*\*([A-Z]) \((\w+)\) (.+?)\*\*\s*[—-]\s*(.*)$", k)
+    if m:
+        return (f'<li><span class="L">{m.group(1)}</span><div><b>{html.escape(m.group(3))}<small>{m.group(2)}</small></b>'
+                f'<p>{inline(m.group(4))}</p></div></li>')
+    return f'<li><span class="L"></span><div><p>{inline(k)}</p></div></li>'
+
+
 def build_note(cfg, n, c):
     prefix = "../../"
-    sit = next(s for s in cfg["situations"] if s["id"] == c["situation"])
-    crumb = f'<p class="tag">{age_label(cfg, c)} · {html.escape(sit["label"])}</p>'
-    no_mark = f'<span class="no" aria-hidden="true">{n["no"]}</span>'
+    meta = (f'<p class="mt"><span class="tag">{age_label(cfg, c)} · {html.escape(sit_of(cfg, c)["label"])}</span>'
+            f'<span class="qno">질문 {n["no"]}</span></p>')
+    back = f'<a class="back" href="{prefix}">다른 질문 보기{icon("arrow")}</a>'
     if not c.get("published"):
-        when = f'{fmt_date(c["release"])} 공개' if c.get("release") else "준비 중"
-        body = f"""<section class="hero">{no_mark}{crumb}<h1>{inline(n['question'])}</h1>
-<div class="hero-ans"><b>{when}</b><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div></section>
-<p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
+        # 공개 날짜는 쓰지 않는다(10-31 질문002~050 공개 보류 — 정해지면 그때 공개로 바꾼다)
+        body = f"""<section class="top"><div class="in head">{meta}<h1 class="title">{inline(n['question'])}</h1>
+<div class="status"><b>정리 중</b><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div></div></section>
+<div class="wrap">{back}</div>"""
         return page(prefix, f"{n['question']} — AI시대 부모백과", "준비 중", body)
 
-    # 결론 첫 문장을 큰 글씨로 떼어 내고, 나머지는 정본 그대로 잇는다
     big, concl_html, today = split_conclusion(n)
-    today = f'<div class="todo"><b>오늘 해 볼 한 가지</b>{today}</div>' if today else ""
-    # 굵은 제목 덩어리(<b>…</b>만 있는 줄)부터 다음 제목·인용구 전까지를 한 접이 칸으로 묶는다
-    ev_html, group = [], None
-
-    def close():
-        nonlocal group
-        if group:
-            title, parts = group
-            ev_html.append(f'<details{" open" if len(ev_html) == 0 else ""}><summary>{title}</summary>{"".join(parts)}</details>')
-        group = None
-    for b in md_blocks(n["evidence"]):
-        if isinstance(b, tuple) and b[0] == "unknown":
-            close()
-            ev_html.append(f'<details open><summary>아직 모르는 것</summary><p>{lead_rest(b[1], "**아직 모르는 것**")}</p></details>')
-        elif isinstance(b, tuple) and b[0] == "quote":
-            close()
-            ev_html.append(f'<blockquote class="sum">{b[1]}</blockquote>')
-        elif isinstance(b, str):
-            head = re.match(r"<p><b>([^<]+)</b>(?:<br>|\s+)?(.*)</p>$", b, re.S)
-            if head:
-                close()
-                group = (head.group(1), [f"<p>{head.group(2).strip()}</p>"] if head.group(2).strip() else [])
-            elif group:
-                group[1].append(b)
-            else:
-                ev_html.append(b)
-    close()
+    today = f'<div class="today"><b>오늘 해 볼 한 가지</b>{today}</div>' if today else ""
+    groups, quotes, unknown, refs, loose = parse_evidence(n)
+    ev = [ev_group_html(i, t, parts) for i, (t, parts) in enumerate(groups)]
+    ev += [f'<div class="card unk"><b>아직 모르는 것</b><p>{u}</p></div>' for u in unknown]
+    ev += [f'<div class="card prose">{b}</div>' for b in loose]
+    if quotes:
+        # 마지막 인용(한 줄 정리)만 큰 글씨
+        ev.append('<div class="wrapup"><p class="lab">정리</p>' + "".join(f"<p>{q}</p>" for q in quotes[:-1])
+                  + f'<p class="last">{quotes[-1]}</p></div>')
     # 구성 목록 첫 줄의 「자료 이름」 A4 n쪽. 은 바로 위 제목과 겹치므로 떼어 낸다
     kit_items = [re.sub(r"^「[^」]+」\s*A4\s*\d+쪽\.?\s*", "", k) for k in n.get("kit", [])]
-    kit = "".join(f'<li>{inline(k)}</li>' for k in kit_items if k)
+    kit = "".join(kit_item(k) for k in kit_items if k)
     if c.get("nepcon_url"):
-        cta = f'<a class="btn" href="{html.escape(c["nepcon_url"])}" rel="noopener">네이버 프리미엄콘텐츠에서 활동지 받기</a>'
+        cta = f'<a class="btn" href="{html.escape(c["nepcon_url"])}" rel="noopener">{icon("down")}활동지 받기</a>'
     else:
-        cta = '<p class="btn off">네이버 프리미엄콘텐츠 단품 · 링크 준비 중</p>'
+        cta = '<span class="btn off">활동지 준비 중</span>'
     # 쇼츠(H2)가 확정된 글만: shorts/NNN.mp4 + NNN.jpg(첫 화면)
     shorts = ""
     if c.get("shorts"):
@@ -267,31 +360,50 @@ def build_note(cfg, n, c):
                   f'<video controls playsinline preload="none" poster="{prefix}shorts/{n["no"]}.jpg" width="720" height="1280">'
                   f'<source src="{prefix}shorts/{n["no"]}.mp4" type="video/mp4"></video></section>')
     wb = '<p class="wb">이 실천 자료는 『어린이를 위한 AI시대 생각주도력 워크북(기초편)』에도 묶여 나올 예정이에요.</p>' if n.get("workbook") else ""
-    body = f"""<section class="hero" id="conclusion">{no_mark}{crumb}<h1>{inline(n['question'])}</h1>
-<div class="hero-ans"><h2 class="sr">결론</h2><b>{html.escape(big)}</b>{''.join(concl_html)}</div>{today}</section>
+    toc = [("conclusion", "결론"), ("evidence", f"근거 · {len(groups)}가지"), ("practice", "실천 · 휴먼쌤 ACT")]
+    if refs:
+        toc.append(("refs", "참고자료"))
+    toc_html = "".join(f'<a href="#{a}"><span>{i}</span>{t}</a>' for i, (a, t) in enumerate(toc, 1))
+    byline = f"정리 휴먼쌤 김수현 · 근거 {len(groups)}가지" + (f" · 참고자료 {len(refs)}편" if refs else "")
+    refs_html = (f'<section id="refs" aria-labelledby="refs-h"><h2 class="refs-h" id="refs-h">참고자료</h2>'
+                 f'<ol class="refs">{"".join(f"<li>{r}</li>" for r in refs)}</ol></section>') if refs else ""
+    body = f"""<section class="top"><div class="in head" id="conclusion">{meta}<h1 class="title">{inline(n['question'])}</h1>
+<p class="byline">{byline}</p>
+<div class="summary"><h2 class="lab">결론</h2><p class="big">{html.escape(big)}</p>{''.join(concl_html)}{today}</div>
+<nav class="card toc" aria-label="이 글의 차례">{toc_html}</nav></div></section>
+<div class="wrap">
 {shorts}
-<nav class="tabs" aria-label="이 글의 차례"><a href="#conclusion">결론</a><a href="#evidence">근거</a><a href="#practice">실천</a></nav>
-<section class="evs" id="evidence"><h2>근거</h2>{''.join(ev_html)}</section>
-<section class="paid" id="practice"><div class="act" aria-hidden="true">{ACT}</div><h2>오늘 저녁 바로 해 보려면</h2><p class="kitname">휴먼쌤 ACT 3단계 · 활동지 「{html.escape(n['material'])}」 PDF {n['pages']}쪽</p><ul>{kit}</ul>{cta}{wb}</section>
-<p><a class="back" href="{prefix}">다른 질문 보기</a></p>"""
+<section id="evidence" aria-labelledby="ev-h"><h2 id="ev-h">근거</h2>{''.join(ev)}</section>
+<section id="practice" aria-labelledby="pr-h"><h2 id="pr-h">오늘 저녁 바로 해 보려면</h2><p class="sub">휴먼쌤 ACT 3단계</p>
+<ol class="card acts">{kit}</ol>
+<div class="kit"><div class="nm"><b>{html.escape(n['material'])}</b><span>휴먼쌤 ACT 활동지 · PDF {n['pages']}쪽</span></div>{cta}</div>{wb}</section>
+{refs_html}
+{back}
+</div>"""
     return page(prefix, f"{n['question']} — AI시대 부모백과", big, body)
 
 
 def build_situation(cfg, notes, s, nos):
     prefix = "../../"
-    rows = "".join(note_card_html(prefix, notes[no], cfg["notes"][no], cfg) for no in nos)
-    body = f'<p class="crumb">상황</p><h1 class="q">{html.escape(s["label"])}</h1><section class="pick"><div class="rows">{rows}</div></section><p><a class="back" href="{prefix}">처음으로</a></p>'
+    rows = "".join(row_html(prefix, cfg, notes[no], cfg["notes"][no]) for no in nos)
+    n_live = sum(1 for no in nos if cfg["notes"][no].get("published"))
+    body = f"""<section class="top"><div class="in head"><p class="mt"><span class="tag">상황</span></p><h1 class="title">{html.escape(s["label"])}</h1>
+<p class="byline">질문 {len(nos)}개 · 공개 {n_live}편</p></div></section>
+<div class="wrap"><section aria-label="이 상황의 질문"><div class="card rows">{rows}</div></section>
+<a class="back" href="{prefix}">처음으로{icon("arrow")}</a></div>"""
     return page(prefix, f"{s['label']} — AI시대 부모백과", "이 상황에 맞는 질문과 답", body)
 
 
 def build_about():
     prefix = "../"
-    body = """<p class="crumb">소개</p><h1 class="q">AI시대 부모백과</h1>
-<section class="ans"><div class="big">부모의 질문에 답하는 AI 교육 가이드</div>
+    body = f"""<section class="top"><div class="in head"><p class="mt"><span class="tag">소개</span></p><h1 class="title">AI시대 부모백과</h1></div></section>
+<div class="wrap">
+<section class="card prose"><h2>부모의 질문에 답하는 AI 교육 가이드</h2>
 <p>아이와 AI 사이에서 부모님이 실제로 묻는 질문 하나에 결론과 근거로 답합니다. 결론 끝에는 오늘 해 볼 한 가지를, 근거 끝에는 아직 모르는 것을 함께 적어요.</p>
 <p>결론과 근거는 누구나 무료로 읽을 수 있어요. 아이와 바로 해 볼 수 있는 실천 자료는 네이버 프리미엄콘텐츠에서 단품으로 만나실 수 있어요. 광고는 붙이지 않아요.</p></section>
-<section class="ans"><div class="big">답하는 사람 · 휴먼쌤 김수현</div><p>현직 초등교사이자 아빠입니다.</p></section>
-<p><a class="back" href="../">처음으로</a></p>"""
+<section class="card prose"><h2>답하는 사람 · 휴먼쌤 김수현</h2><p>현직 초등교사이자 아빠입니다.</p></section>
+<a class="back" href="../">처음으로{icon("arrow")}</a>
+</div>"""
     return page(prefix, "소개 — AI시대 부모백과", "부모의 질문에 답하는 AI 교육 가이드, AI시대 부모백과 소개", body)
 
 
@@ -324,7 +436,8 @@ def cmd_build():
         nos = [no for no, c in cfg["notes"].items() if c["situation"] == s["id"] and no in notes]
         if len(nos) > 1:
             write(f"s/{s['id']}/index.html", build_situation(cfg, notes, s, nos))
-    nf = page("/", "찾는 페이지가 없어요 — AI시대 부모백과", "", '<h1 class="q">찾는 페이지가 없어요</h1><p><a class="back" href="./">처음으로</a></p>')
+    nf = page("/", "찾는 페이지가 없어요 — AI시대 부모백과", "",
+              f'<section class="top"><div class="in head"><h1 class="title">찾는 페이지가 없어요</h1></div></section><div class="wrap"><a class="back" href="/">처음으로{icon("arrow")}</a></div>')
     write("404.html", nf)
     print("docs/ 만듦:", sum(1 for _ in OUT.rglob("*.html")), "쪽")
 
