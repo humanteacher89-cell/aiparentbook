@@ -66,6 +66,7 @@
     "044": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "homework", "nepcon_url": ""},
     "045": {"published": false, "release": "", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
     "046": {"published": false, "release": "", "ages": ["elementary"], "situation": "heart", "nepcon_url": ""},
+    "047": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "heart", "nepcon_url": ""},
     "048": {"published": false, "release": "", "ages": ["elementary"], "situation": "school", "nepcon_url": ""},
     "049": {"published": false, "release": "", "ages": ["teen"], "situation": "age", "nepcon_url": ""},
     "050": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "future", "nepcon_url": ""}
