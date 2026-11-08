@@ -7,6 +7,7 @@
 - config.json에서 published가 false인 글은 질문·공개일만 가져온다(본문은 저장소에 넣지 않는다).
 - 모든 링크는 상대 경로라 github.io 하위 주소와 aiparentbook.com 루트 양쪽에서 돈다.
 - 화면은 시안 C '근거 사전'(2026-10-31 휴먼쌤 선택), 글꼴 · 글씨 크기는 휴먼티처닷컴 가독성을 따름(11-01).
+- 첫 화면 검색창 아래는 시안 B '사전처럼'(2026-11-08 휴먼쌤 선택): 오늘의 질문 띠 · 상황 타일 · 질문 번호(접힘) · 답하는 사람.
 """
 import html
 import json
@@ -232,14 +233,18 @@ btns.forEach(function(b){b.setAttribute('aria-pressed',!words.length&&b.dataset.
 rows.forEach(function(t){var ok=words.length?words.every(function(w){return t.dataset.text.indexOf(w)>-1}):(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1;if(ok)shown++;t.hidden=!ok||(!words.length&&!open&&shown>LIMIT)});
 box.hidden=!shown;empty.hidden=!!shown;empty.textContent=words.length?EMPTY_Q:EMPTY_AGE;hint.hidden=!words.length;if(words.length)hintT.textContent='"'+q.value.trim()+'" 찾은 질문 '+shown+'개';
 more.hidden=!!words.length||open||shown<=LIMIT;more.textContent='질문 '+(shown-LIMIT)+'개 더 보기';}
-function go(){show();list.scrollIntoView({behavior:'smooth',block:'start'})}
+var fold=document.getElementById('qfold');
+function unfold(){if(fold&&!fold.open)fold.open=true}
+function go(){unfold();show();list.scrollIntoView({behavior:'smooth',block:'start'})}
+function byHash(){if(location.hash==='#questions'){unfold();list.scrollIntoView({block:'start'})}}
+window.addEventListener('hashchange',byHash);
 btns.forEach(function(b){b.addEventListener('click',function(){age=b.dataset.age;q.value='';open=false;try{localStorage.setItem(KEY,age)}catch(e){}show()})});
 more.addEventListener('click',function(){open=true;show()});
 document.getElementById('search').addEventListener('submit',function(e){e.preventDefault();go()});
-q.addEventListener('input',show);
+q.addEventListener('input',function(){if(q.value.trim())unfold();show()});
 [].slice.call(document.querySelectorAll('.chips button')).forEach(function(b){b.addEventListener('click',function(){q.value=b.dataset.q;go()})});
 document.getElementById('clear').addEventListener('click',function(){q.value='';show();q.focus()});
-try{age=localStorage.getItem(KEY)||age}catch(e){}show();})();
+try{age=localStorage.getItem(KEY)||age}catch(e){}show();byHash();})();
 </script>"""
 
 
@@ -249,22 +254,21 @@ def build_index(cfg, notes):
     live = sorted([no for no in have if cfg["notes"][no].get("published")],
                   key=lambda k: cfg["notes"][k]["release"], reverse=True)
     total = len(have)
-    pct = max(4, round(len(live) * 100 / total)) if total else 0
-    go = f'<a class="go" href="q/{live[0]}/">공개된 질문 읽기{icon("arrow")}</a>' if live else ""
-    progress = f"""<section class="progress" aria-label="정리 현황"><p class="pt">질문 {total}개를 차례로 정리하고 있어요</p>
-<p class="pn"><span>공개 {len(live)}편</span><span>정리 중 {total - len(live)}편</span></p>
-<div class="pb" aria-hidden="true"><i style="width:{pct}%"></i></div>{go}</section>"""
-    latest = build_latest(cfg, notes[live[0]], cfg["notes"][live[0]]) if live else ""
-    idx = []
-    for s in cfg["situations"]:
+    # 시안 B '사전처럼'(2026-11-08 휴먼쌤 선택): 오늘의 질문 띠 → 상황 타일 → 질문 번호(접힘) → 답하는 사람
+    today = ""
+    if live:
+        tn = notes[live[0]]
+        today = (f'<section aria-label="지금 읽을 수 있는 글"><a class="todaystrip" href="q/{tn["no"]}/"><span><small>지금 읽을 수 있는 글 · 질문 {tn["no"]}</small>'
+                 f'<b>{inline(tn["question"])}</b></span><span class="arrow">{icon("arrow")}</span></a></section>')
+    tiles = []
+    for i, s in enumerate([s for s in cfg["situations"] if any(cfg["notes"][no]["situation"] == s["id"] for no in have)], 1):
         nos = [no for no in have if cfg["notes"][no]["situation"] == s["id"]]
-        if not nos:
-            continue
         href = f"q/{nos[0]}/" if len(nos) == 1 else f"s/{s['id']}/"
         n_live = sum(1 for no in nos if cfg["notes"][no].get("published"))
-        st = f'<span class="n">{n_live}편</span>' if n_live else '<span class="z">정리 중</span>'
+        st = f'<span class="n">{n_live}편 읽기</span>' if n_live else '<span class="z">준비 중</span>'
         on = ' class="on"' if n_live else ""
-        idx.append(f'<a{on} href="{href}"><span class="iw">{icon(s["id"])}</span><span class="t">{html.escape(s["label"])}</span>{st}</a>')
+        tiles.append(f'<a{on} href="{href}"><span class="dot">{i}</span><span class="t">{html.escape(s["label"])}</span>{st}</a>')
+    ages_txt = " · ".join(a["label"] for a in cfg["ages"])
     age_btns = "".join(
         f'<button type="button" data-age="{a["id"]}" aria-pressed="{"true" if a["id"] == "elementary" else "false"}">{a["label"]}</button>'
         for a in cfg["ages"])
@@ -277,18 +281,23 @@ def build_index(cfg, notes):
 <div class="chips"><span>자주 찾는 말</span>{chips}</div>
 </div></section>
 <div class="wrap">
-{progress}
-{latest}
-<section id="situations" aria-labelledby="sit-h"><div class="sh"><h2 id="sit-h">상황별 색인</h2><span>{len(idx)}가지 상황</span></div>
-<nav class="card idx" aria-labelledby="sit-h">{"".join(idx)}</nav></section>
-<section id="questions" aria-labelledby="all-h"><div class="sh"><h2 id="all-h">질문 모두 보기</h2><span>{total}개</span></div>
+{today}
+<section id="situations" aria-labelledby="sit-h"><div class="sh"><h2 id="sit-h">상황으로 찾기</h2><span>{len(tiles)}가지 상황</span></div>
+<nav class="tiles" aria-labelledby="sit-h">{"".join(tiles)}</nav></section>
+<section id="questions" aria-labelledby="all-h"><div class="sh"><h2 id="all-h">질문 번호로 찾기</h2><span>{total}개</span></div>
+<details class="card fold" id="qfold"><summary>질문 {total}개 펼치기 ({ages_txt})</summary>
+<div class="inner">
 <div class="seg" id="ages" role="group" aria-label="아이 나이">{age_btns}</div>
 <p class="hint" id="hint" hidden><span id="hint-t"></span><button type="button" id="clear">지우기</button></p>
 <div class="card rows" id="rows">{rows}</div>
 <button type="button" class="more-btn" id="more" hidden>더 보기</button>
-<p class="empty" id="empty" hidden>이 나이에 맞는 질문은 아직 없어요. 지금은 초등 자녀를 둔 부모님 질문부터 답하고 있어요.</p></section>
-<section aria-labelledby="how-h"><h2 id="how-h">한 편은 이렇게 정리해요</h2>
-<ol class="steps"><li class="card"><i>1</i><b>질문</b><span>부모님이 실제로 묻는 질문</span></li><li class="card"><i>2</i><b>결론</b><span>먼저 한 줄로 답해요</span></li><li class="card"><i>3</i><b>근거</b><span>연구와 자료로 확인해요</span></li><li class="card"><i>4</i><b>실천</b><span>오늘 저녁 해 볼 ACT 활동</span></li></ol></section>
+<p class="empty" id="empty" hidden>이 나이에 맞는 질문은 아직 없어요. 지금은 초등 자녀를 둔 부모님 질문부터 답하고 있어요.</p>
+</div></details></section>
+<section aria-label="답하는 사람"><article class="card whoam">
+<img src="humanssaem-mark.png" alt="" width="52" height="52">
+<p><b>질문에 답하는 사람, 휴먼쌤 김수현</b>공립 초등교사 14년차, 딸 둘 아빠. 질문마다 연구 근거와 그 한계를 함께 적고, 효과를 약속하지 않아요. <a href="https://human-teacher.com/" rel="noopener">휴먼쌤 소개</a></p>
+<a class="btn" href="https://contents.premium.naver.com/humanteacher/humanteacher89" rel="noopener">네이버에서 새 질문 무료 구독</a>
+</article></section>
 </div>
 {HOME_JS}"""
     return page("", "AI시대 부모백과 — 부모의 질문에 답하는 AI 교육 가이드",
