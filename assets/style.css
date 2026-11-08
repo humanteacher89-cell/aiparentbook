@@ -175,17 +175,43 @@ mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
 .todaystrip small{display:block;font-size:13.5px;color:#D6D1F0;margin-bottom:3px}
 .todaystrip b{font-family:var(--display);font-weight:400;font-size:19px;line-height:1.35}
 .todaystrip .arrow{margin-left:auto;flex:none;width:46px;height:46px;border-radius:50%;background:var(--amber);color:#1C1A33;display:flex;align-items:center;justify-content:center}
-.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.tiles a{display:grid;align-content:start;gap:8px;padding:16px 14px;border:2px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);text-decoration:none;min-height:116px}
-.tiles .dot{width:34px;height:34px;border-radius:50%;background:var(--tint);display:flex;align-items:center;justify-content:center;color:var(--brand-ink);font-family:var(--display);font-size:16px}
-.tiles a.on{border-color:var(--brand-ink)}
-.tiles a.on .dot{background:var(--brand);color:#fff}
-.tiles .t{font-size:16px;line-height:1.45}
-.tiles a.on .t{font-weight:700}
-.tiles .n{font-family:var(--display);font-size:15px;color:var(--brand-ink)}
-.tiles .z{font-size:14px;color:var(--soft)}
+/* 키워드 카드(11-08): 큰 카드 2열, 누르면 키워드 쪽 s/<id>/ */
+.ktiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ktile{display:grid;align-content:start;gap:8px;min-height:124px;padding:16px 14px;border:2px solid var(--line);border-radius:16px;background:var(--card);color:var(--ink);text-decoration:none}
+.ktile .dot{width:34px;height:34px;border-radius:50%;background:var(--tint);display:flex;align-items:center;justify-content:center;color:var(--brand-ink);font-family:var(--display);font-size:16px}
+.ktile .t{font-family:var(--display);font-size:21px;line-height:1.3}
+.ktile .n{font-size:14px;line-height:1.4;color:var(--soft)}
+.ktile.has{border-color:var(--brand-ink)}
+.ktile.has .dot{background:var(--brand);color:#fff}
+.ktile.has .n{font-family:var(--display);font-size:14.5px;color:var(--brand-ink)}
+.ktile:active{transform:translateY(2px)}
+/* 한 편은 이렇게 정리해요(휴먼티처닷컴 '이렇게 답해요' 블록 차용) */
+.howto{display:grid;gap:12px}
+.hsteps{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.hsteps li{display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 16px}
+.hsteps i{width:44px;height:44px;border-radius:50%;background:var(--brand);color:#fff;font-style:normal;font-family:var(--display);font-size:20px;display:flex;align-items:center;justify-content:center}
+.hsteps b{display:block;font-family:var(--display);font-weight:400;font-size:19px;color:var(--brand-dark);line-height:1.3;margin-bottom:2px}
+.hsteps p{font-size:16px;line-height:1.7;color:var(--ink2)}
+.actchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.actchips span{font-family:var(--display);font-size:14px;color:#fff;border-radius:999px;padding:4px 11px}
+.actchips .a{background:#C9482A}.actchips .c{background:#187E6C}.actchips .t{background:#223A5E}
+/* 왼쪽 위 '이전으로'와 키워드 쪽 질문 카드 */
+.prevbar{padding-top:10px;padding-bottom:2px;background:var(--card)}
+.prev{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 14px 0 8px;margin-left:-8px;border-radius:999px;font-family:var(--display);font-size:16px;color:var(--brand-ink);text-decoration:none}
+.prev:hover{background:var(--tint)}
+.prev .ic{width:20px;height:20px}
+.qcs{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.qc{display:grid;gap:8px;padding:18px;color:var(--ink);text-decoration:none}
+.qc .qm{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.qc .st{font-size:14px;color:var(--soft);background:var(--line2);border-radius:999px;padding:2px 10px}
+.qc .st.on{font-family:var(--display);color:var(--brand-ink);background:var(--tint)}
+.qc b{font-family:var(--display);font-weight:400;font-size:20px;line-height:1.4}
+.qc .ql{font-size:16px;line-height:1.7;color:var(--ink2)}
+.qc .go{display:flex;align-items:center;justify-content:space-between;margin-top:4px;padding-top:12px;border-top:2px dashed var(--line);font-family:var(--display);font-size:16px;color:var(--brand-ink)}
+.qc.live{border-color:var(--brand-ink)}
 .fold{padding:0 18px}
-.fold summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:58px;font-family:var(--display);font-size:18px;color:var(--brand-dark)}
+.fold summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:flex-start;gap:10px;min-height:58px;font-family:var(--display);font-size:18px;color:var(--brand-dark)}
+.fold summary .cnt{margin-left:auto;font-family:var(--font);font-size:14px;color:var(--soft)}
 .fold summary::-webkit-details-marker{display:none}
 .fold summary::after{content:"+";flex:none;width:30px;height:30px;border-radius:50%;background:var(--tint);color:var(--brand-ink);display:flex;align-items:center;justify-content:center;font-size:20px}
 .fold[open] summary::after{content:"–"}
@@ -195,5 +221,5 @@ mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
 .whoam p{font-size:15.5px;line-height:1.7;color:var(--ink2)}
 .whoam p b{font-family:var(--display);font-weight:400;font-size:18px;color:var(--ink);display:block;margin-bottom:2px}
 .whoam .btn{grid-column:1/-1;height:54px;font-size:18px}
-@media (min-width:700px){.tiles{grid-template-columns:repeat(3,1fr)}}
+@media (min-width:700px){.ktiles{grid-template-columns:repeat(3,1fr)}.hsteps{grid-template-columns:1fr 1fr}}
 @media (min-width:700px){.hero{padding:60px 18px 44px}.hero h1{font-size:44px}.title{font-size:38px}.steps{grid-template-columns:repeat(4,minmax(0,1fr))}.kit{grid-template-columns:1fr auto;align-items:center}.kit .btn{padding:0 28px}}

@@ -136,6 +136,7 @@ def ref_short(r):
 ICON_PATHS = {
     "search": '<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.6-3.6"/>',
     "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    "back": '<path d="M19 12H5M11 18l-6-6 6-6"/>',
     "down": '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>',
     "homework": '<path d="M4 20h4L19 9l-4-4L4 16v4zM14 6l4 4"/>',
     "start": '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
@@ -258,31 +259,39 @@ def build_index(cfg, notes):
     today = ""
     if live:
         tn = notes[live[0]]
-        today = (f'<section aria-label="지금 읽을 수 있는 글"><a class="todaystrip" href="q/{tn["no"]}/"><span><small>지금 읽을 수 있는 글 · 질문 {tn["no"]}</small>'
+        today = (f'<section aria-label="최근에 올라온 글"><a class="todaystrip" href="q/{tn["no"]}/"><span><small>최근에 올라온 글 · 질문 {tn["no"]}</small>'
                  f'<b>{inline(tn["question"])}</b></span><span class="arrow">{icon("arrow")}</span></a></section>')
+    # 키워드 카드(11-08 휴먼쌤): 상황 문장 대신 짧은 키워드(config의 kw). 누르면 키워드 쪽 s/<id>/로 간다
     tiles = []
     for i, s in enumerate([s for s in cfg["situations"] if any(cfg["notes"][no]["situation"] == s["id"] for no in have)], 1):
         nos = [no for no in have if cfg["notes"][no]["situation"] == s["id"]]
-        href = f"q/{nos[0]}/" if len(nos) == 1 else f"s/{s['id']}/"
         n_live = sum(1 for no in nos if cfg["notes"][no].get("published"))
-        st = f'<span class="n">{n_live}편 읽기</span>' if n_live else '<span class="z">준비 중</span>'
-        on = ' class="on"' if n_live else ""
-        tiles.append(f'<a{on} href="{href}"><span class="dot">{i}</span><span class="t">{html.escape(s["label"])}</span>{st}</a>')
+        st = f"질문 {len(nos)}개 · {n_live}편 읽기" if n_live else f"질문 {len(nos)}개 · 준비 중"
+        on = " has" if n_live else ""
+        tiles.append(f'<a class="ktile{on}" href="s/{s["id"]}/"><span class="dot">{i}</span><span class="t">{html.escape(s.get("kw") or s["label"])}</span>'
+                     f'<span class="n">{st}</span></a>')
     # 분류는 상황 하나로 통일(11-08 휴먼쌤 "그냥 상황으로만 통일할게"): 나이 버튼은 두지 않는다. 나이는 config에 그대로 두고 검색 글자에만 쓴다
     rows = "".join(row_html("", cfg, notes[no], cfg["notes"][no]) for no in have)
-    chips = "".join(f'<button type="button" data-q="{w}">{w}</button>' for w in ("숙제", "챗GPT", "개인정보", "학교"))
+    # '자주 찾는 말' 칩은 키워드 카드와 같은 일이라 뺐다(11-08). 첫 문장 아래 설명 한 줄 대신 '한 편은 이렇게 정리해요' 4단계(휴먼티처닷컴 블록 차용)
+    steps = """<section class="howto" aria-labelledby="how-h"><h2 id="how-h">한 편은 이렇게 정리해요</h2>
+<ol class="hsteps">
+<li><i>1</i><div><b>질문</b><p>부모님이 실제로 묻는 말 그대로 시작해요. "숙제할 때 챗GPT 써도 되나요?"처럼요.</p></div></li>
+<li><i>2</i><div><b>결론</b><p>답을 먼저 한 줄로 말해요. 되는지 안 되는지, 그리고 그보다 중요한 것이 무엇인지.</p></div></li>
+<li><i>3</i><div><b>근거</b><p>연구를 셋 안팎 골라 누가 누구를 어떻게 살폈는지 적고, 그 연구가 말해 주지 못하는 것(한계)도 함께 적어요.</p></div></li>
+<li><i>4</i><div><b>오늘 해 볼 한 가지</b><p>집에서 바로 해 볼 한 가지를 질문하기 · 확인하기 · 실천하기 세 걸음(휴먼쌤 ACT)으로 정리해요.</p>
+<span class="actchips"><span class="a">A 질문하기</span><span class="c">C 확인하기</span><span class="t">T 실천하기</span></span></div></li>
+</ol></section>"""
     body = f"""<section class="top"><div class="hero">
 <h1>아이가 쓰는 AI,<br>근거로 확인하세요</h1>
-<p class="lede">부모님이 실제로 묻는 질문을 골라 <b>결론 · 근거 · 실천</b>을 한 쪽에 정리합니다.</p>
 <form class="search" id="search" role="search"><label class="sr" for="q">질문 찾기</label><input id="q" type="search" placeholder="무엇이 궁금하세요?" autocomplete="off"><button type="submit" aria-label="찾기">{icon("search")}</button></form>
-<div class="chips"><span>자주 찾는 말</span>{chips}</div>
 </div></section>
 <div class="wrap">
+{steps}
 {today}
-<section id="situations" aria-labelledby="sit-h"><div class="sh"><h2 id="sit-h">상황으로 찾기</h2><span>{len(tiles)}가지 상황</span></div>
-<nav class="tiles" aria-labelledby="sit-h">{"".join(tiles)}</nav></section>
-<section id="questions" aria-labelledby="all-h"><div class="sh"><h2 id="all-h">질문 번호로 찾기</h2><span>{total}개</span></div>
-<details class="card fold" id="qfold"><summary>질문 {total}개 번호순으로 펼치기</summary>
+<section id="situations" aria-labelledby="sit-h"><div class="sh"><h2 id="sit-h">키워드로 찾기</h2><span>{len(tiles)}가지</span></div>
+<nav class="ktiles" aria-labelledby="sit-h">{"".join(tiles)}</nav></section>
+<section id="questions" aria-labelledby="all-h">
+<details class="card fold" id="qfold"><summary>전체 질문 살펴보기 <span class="cnt">{total}개</span></summary>
 <div class="inner">
 <p class="hint" id="hint" hidden><span id="hint-t"></span><button type="button" id="clear">지우기</button></p>
 <div class="card rows" id="rows">{rows}</div>
@@ -334,7 +343,7 @@ def build_note(cfg, n, c):
     back = f'<a class="back" href="{prefix}">다른 질문 보기{icon("arrow")}</a>'
     if not c.get("published"):
         # 공개 날짜는 쓰지 않는다(10-31 질문002~050 공개 보류 — 정해지면 그때 공개로 바꾼다)
-        body = f"""<section class="top"><div class="in head">{meta}<h1 class="title">{inline(n['question'])}</h1>
+        body = f"""{prev_link(prefix)}<section class="top"><div class="in head">{meta}<h1 class="title">{inline(n['question'])}</h1>
 <div class="status"><b>정리 중</b><p>휴먼쌤이 결론과 근거를 정리하고 있어요. 공개되면 이 주소에서 바로 읽으실 수 있어요.</p></div></div></section>
 <div class="wrap">{back}</div>"""
         return page(prefix, f"{n['question']} — AI시대 부모백과", "준비 중", body)
@@ -370,7 +379,7 @@ def build_note(cfg, n, c):
     byline = f"정리 휴먼쌤 김수현 · 근거 {len(groups)}가지" + (f" · 참고자료 {len(refs)}편" if refs else "")
     refs_html = (f'<section id="refs" aria-labelledby="refs-h"><h2 class="refs-h" id="refs-h">참고자료</h2>'
                  f'<ol class="refs">{"".join(f"<li>{r}</li>" for r in refs)}</ol></section>') if refs else ""
-    body = f"""<section class="top"><div class="in head" id="conclusion">{meta}<h1 class="title">{inline(n['question'])}</h1>
+    body = f"""{prev_link(prefix)}<section class="top"><div class="in head" id="conclusion">{meta}<h1 class="title">{inline(n['question'])}</h1>
 <p class="byline">{byline}</p>
 <div class="summary"><h2 class="lab">결론</h2><p class="big">{html.escape(big)}</p>{''.join(concl_html)}{today}</div>
 <nav class="card toc" aria-label="이 글의 차례">{toc_html}</nav></div></section>
@@ -386,13 +395,36 @@ def build_note(cfg, n, c):
     return page(prefix, f"{n['question']} — AI시대 부모백과", big, body)
 
 
+PREV_JS = ("if(document.referrer&&document.referrer.indexOf(location.host)>-1&&history.length>1)"
+           "{history.back();return false}")
+
+
+def prev_link(href):
+    """왼쪽 위 '이전으로'. 이 사이트 안에서 왔으면 뒤로, 바로 들어왔으면 href로."""
+    return f'<div class="prevbar"><div class="in"><a class="prev" href="{href}" onclick="{PREV_JS}">{icon("back")}이전으로</a></div></div>'
+
+
+def q_card(prefix, cfg, n, c):
+    """키워드 쪽의 질문 카드 한 장: 번호 · 상태 · 질문(공개 글은 결론 첫 문장까지)."""
+    live = c.get("published")
+    lead = ""
+    if live and n.get("conclusion"):
+        big, _, _ = split_conclusion(n)
+        lead = f'<p class="ql">{html.escape(big)}</p>'
+    st = '<span class="st on">읽기</span>' if live else '<span class="st">정리 중</span>'
+    go = f'<span class="go">결론 · 근거 · 실천 읽기{icon("arrow")}</span>' if live else ""
+    return (f'<li><a class="card qc{" live" if live else ""}" href="{prefix}q/{n["no"]}/"><span class="qm"><span class="qno">질문 {n["no"]}</span>{st}</span>'
+            f'<b>{inline(n["question"])}</b>{lead}{go}</a></li>')
+
+
 def build_situation(cfg, notes, s, nos):
     prefix = "../../"
-    rows = "".join(row_html(prefix, cfg, notes[no], cfg["notes"][no]) for no in nos)
+    cards = "".join(q_card(prefix, cfg, notes[no], cfg["notes"][no]) for no in nos)
     n_live = sum(1 for no in nos if cfg["notes"][no].get("published"))
-    body = f"""<section class="top"><div class="in head"><p class="mt"><span class="tag">상황</span></p><h1 class="title">{html.escape(s["label"])}</h1>
-<p class="byline">질문 {len(nos)}개 · 공개 {n_live}편</p></div></section>
-<div class="wrap"><section aria-label="이 상황의 질문"><div class="card rows">{rows}</div></section>
+    body = f"""{prev_link(prefix)}
+<section class="top"><div class="in head"><p class="mt"><span class="tag">키워드</span></p><h1 class="title">{html.escape(s.get("kw") or s["label"])}</h1>
+<p class="byline">{html.escape(s["label"])} · 질문 {len(nos)}개 · 읽기 {n_live}편</p></div></section>
+<div class="wrap"><section aria-label="이 키워드의 질문"><ul class="qcs">{cards}</ul></section>
 <a class="back" href="{prefix}">처음으로{icon("arrow")}</a></div>"""
     return page(prefix, f"{s['label']} — AI시대 부모백과", "이 상황에 맞는 질문과 답", body)
 
@@ -437,7 +469,7 @@ def cmd_build():
             write(f"q/{no}/index.html", build_note(cfg, notes[no], c))
     for s in cfg["situations"]:
         nos = [no for no, c in cfg["notes"].items() if c["situation"] == s["id"] and no in notes]
-        if len(nos) > 1:
+        if nos:
             write(f"s/{s['id']}/index.html", build_situation(cfg, notes, s, nos))
     nf = page("/", "찾는 페이지가 없어요 — AI시대 부모백과", "",
               f'<section class="top"><div class="in head"><h1 class="title">찾는 페이지가 없어요</h1></div></section><div class="wrap"><a class="back" href="/">처음으로{icon("arrow")}</a></div>')
