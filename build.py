@@ -300,8 +300,9 @@ def build_index(cfg, notes):
 </div></details></section>
 <section aria-label="답하는 사람"><article class="card whoam">
 <img src="humanssaem-mark.png" alt="" width="52" height="52">
-<p><b>질문에 답하는 사람, 휴먼쌤 김수현</b>공립 초등교사 14년차, 딸 둘 아빠. 질문마다 연구 근거와 그 한계를 함께 적고, 효과를 약속하지 않아요. <a href="https://human-teacher.com/" rel="noopener">휴먼쌤 소개</a></p>
-<a class="btn" href="https://contents.premium.naver.com/humanteacher/humanteacher89" rel="noopener">네이버에서 새 질문 무료 구독</a>
+<p><b>휴먼쌤, 생각주도력 키우는 교사아빠</b>공립 초등교사 14년차 · 딸 둘 아빠</p>
+<a class="btn ghost" href="https://human-teacher.com/" rel="noopener">휴먼쌤 소개 페이지 바로 가기</a>
+<a class="btn brand" href="https://contents.premium.naver.com/humanteacher/humanteacher89" rel="noopener">무료 학습 자료 받으러 가기</a>
 </article></section>
 </div>
 {HOME_JS}"""

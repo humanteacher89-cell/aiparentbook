@@ -220,6 +220,14 @@ mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
 .whoam img{width:52px;height:52px;border-radius:50%;background:var(--tint)}
 .whoam p{font-size:15.5px;line-height:1.7;color:var(--ink2)}
 .whoam p b{font-family:var(--display);font-weight:400;font-size:18px;color:var(--ink);display:block;margin-bottom:2px}
+.whoam{align-items:center}
+.whoam p b{text-wrap:balance;margin-bottom:4px}
 .whoam .btn{grid-column:1/-1;height:54px;font-size:18px}
+.whoam .btn+.btn{margin-top:-4px}
+/* 소개 카드 단추(11-08): 보라 바탕에 어울리게. 소개는 테두리, 자료 받기는 보라 */
+.btn.ghost{background:var(--card);color:var(--brand-ink);border:2px solid var(--brand-ink);box-shadow:none}
+.btn.brand{background:var(--brand);color:#fff;box-shadow:0 5px 0 var(--brand-dark)}
+.btn.brand:active{box-shadow:0 2px 0 var(--brand-dark)}
+@media (prefers-color-scheme: dark){.btn.brand{box-shadow:0 5px 0 #2A2260}}
 @media (min-width:700px){.ktiles{grid-template-columns:repeat(3,1fr)}.hsteps{grid-template-columns:1fr 1fr}}
 @media (min-width:700px){.hero{padding:60px 18px 44px}.hero h1{font-size:44px}.title{font-size:38px}.steps{grid-template-columns:repeat(4,minmax(0,1fr))}.kit{grid-template-columns:1fr auto;align-items:center}.kit .btn{padding:0 28px}}
