@@ -7,15 +7,15 @@
     {"id": "teen", "label": "중고등"}
   ],
   "situations": [
-    {"id": "homework", "label": "숙제에 AI를 쓰려고 해요", "kw": "숙제"},
-    {"id": "start", "label": "처음 AI를 써 보려고 해요", "kw": "처음 쓸 때"},
-    {"id": "trust", "label": "AI 답을 그대로 믿어요", "kw": "AI 답 믿기"},
+    {"id": "homework", "label": "숙제에 AI를 쓰려고 해요", "kw": "숙제", "home": true},
+    {"id": "start", "label": "처음 AI를 써 보려고 해요", "kw": "처음 쓸 때", "home": true},
+    {"id": "trust", "label": "AI 답을 그대로 믿어요", "kw": "AI 답 믿기", "home": true},
     {"id": "wrong", "label": "AI가 틀린 것 같아요", "kw": "틀린 답"},
     {"id": "ask", "label": "AI에게 어떻게 물어야 할지 몰라요", "kw": "묻는 법"},
     {"id": "practice", "label": "배운 걸 직접 해 보게 하고 싶어요", "kw": "직접 해 보기"},
-    {"id": "heart", "label": "아이 마음이 걱정돼요", "kw": "아이 마음"},
-    {"id": "safety", "label": "개인정보·안전이 걱정돼요", "kw": "개인정보·안전"},
-    {"id": "school", "label": "학교·선생님과 맞춰야 해요", "kw": "학교·선생님"},
+    {"id": "heart", "label": "아이 마음이 걱정돼요", "kw": "아이 마음", "home": true},
+    {"id": "safety", "label": "개인정보·안전이 걱정돼요", "kw": "개인정보·안전", "home": true},
+    {"id": "school", "label": "학교·선생님과 맞춰야 해요", "kw": "학교·선생님", "home": true},
     {"id": "age", "label": "아이 나이에 맞게 쓰고 싶어요", "kw": "나이"},
     {"id": "future", "label": "AI 시대에 무엇을 길러야 할까요", "kw": "길러야 할 힘"}
   ],

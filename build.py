@@ -261,15 +261,12 @@ def build_index(cfg, notes):
         tn = notes[live[0]]
         today = (f'<section aria-label="최근에 올라온 글"><a class="todaystrip" href="q/{tn["no"]}/"><span><small>최근에 올라온 글 · 질문 {tn["no"]}</small>'
                  f'<b>{inline(tn["question"])}</b></span><span class="arrow">{icon("arrow")}</span></a></section>')
-    # 키워드 카드(11-08 휴먼쌤): 상황 문장 대신 짧은 키워드(config의 kw). 누르면 키워드 쪽 s/<id>/로 간다
+    # 대표 키워드 6개(11-08 휴먼쌤 "번호나 질문 00개 다 빼고 딱 키워드만, 위아래 폭 줄이고, 대표 6개만, 검색창 바로 아래"):
+    # config 상황 중 home: true. 누르면 키워드 쪽 s/<id>/. 나머지 상황 쪽은 그대로 있고 전체 질문 · 검색으로 닿는다
     tiles = []
-    for i, s in enumerate([s for s in cfg["situations"] if any(cfg["notes"][no]["situation"] == s["id"] for no in have)], 1):
-        nos = [no for no in have if cfg["notes"][no]["situation"] == s["id"]]
-        n_live = sum(1 for no in nos if cfg["notes"][no].get("published"))
-        st = f"질문 {len(nos)}개 · {n_live}편 읽기" if n_live else f"질문 {len(nos)}개 · 준비 중"
-        on = " has" if n_live else ""
-        tiles.append(f'<a class="ktile{on}" href="s/{s["id"]}/"><span class="dot">{i}</span><span class="t">{html.escape(s.get("kw") or s["label"])}</span>'
-                     f'<span class="n">{st}</span></a>')
+    for s in [s for s in cfg["situations"] if s.get("home") and any(cfg["notes"][no]["situation"] == s["id"] for no in have)]:
+        n_live = sum(1 for no in have if cfg["notes"][no]["situation"] == s["id"] and cfg["notes"][no].get("published"))
+        tiles.append(f'<a class="kwb{" has" if n_live else ""}" href="s/{s["id"]}/">{html.escape(s.get("kw") or s["label"])}</a>')
     # 분류는 상황 하나로 통일(11-08 휴먼쌤 "그냥 상황으로만 통일할게"): 나이 버튼은 두지 않는다. 나이는 config에 그대로 두고 검색 글자에만 쓴다
     rows = "".join(row_html("", cfg, notes[no], cfg["notes"][no]) for no in have)
     # '자주 찾는 말' 칩은 키워드 카드와 같은 일이라 뺐다(11-08). 첫 문장 아래 설명 한 줄 대신 '한 편은 이렇게 정리해요' 4단계(휴먼티처닷컴 블록 차용)
@@ -284,12 +281,11 @@ def build_index(cfg, notes):
     body = f"""<section class="top"><div class="hero">
 <h1>아이가 쓰는 AI,<br>근거로 확인하세요</h1>
 <form class="search" id="search" role="search"><label class="sr" for="q">질문 찾기</label><input id="q" type="search" placeholder="무엇이 궁금하세요?" autocomplete="off"><button type="submit" aria-label="찾기">{icon("search")}</button></form>
+<nav class="kwbs" id="situations" aria-label="대표 키워드">{"".join(tiles)}</nav>
 </div></section>
 <div class="wrap">
 {steps}
 {today}
-<section id="situations" aria-labelledby="sit-h"><div class="sh"><h2 id="sit-h">키워드로 찾기</h2><span>{len(tiles)}가지</span></div>
-<nav class="ktiles" aria-labelledby="sit-h">{"".join(tiles)}</nav></section>
 <section id="questions" aria-labelledby="all-h">
 <details class="card fold" id="qfold"><summary>전체 질문 살펴보기 <span class="cnt">{total}개</span></summary>
 <div class="inner">
