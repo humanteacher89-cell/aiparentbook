@@ -230,7 +230,7 @@ more=document.getElementById('more'),LIMIT=12,open=false,
 age='elementary',EMPTY_AGE=empty.textContent,EMPTY_Q='찾는 질문이 아직 없어요. 다른 말로 찾아보세요.';
 function show(){var term=q.value.trim().toLowerCase(),words=term?term.split(/\\s+/):[],shown=0;
 btns.forEach(function(b){b.setAttribute('aria-pressed',!words.length&&b.dataset.age===age?'true':'false')});
-rows.forEach(function(t){var ok=words.length?words.every(function(w){return t.dataset.text.indexOf(w)>-1}):(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1;if(ok)shown++;t.hidden=!ok||(!words.length&&!open&&shown>LIMIT)});
+rows.forEach(function(t){var ok=words.length?words.every(function(w){return t.dataset.text.indexOf(w)>-1}):(!btns.length||(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1);if(ok)shown++;t.hidden=!ok||(!words.length&&!open&&shown>LIMIT)});
 box.hidden=!shown;empty.hidden=!!shown;empty.textContent=words.length?EMPTY_Q:EMPTY_AGE;hint.hidden=!words.length;if(words.length)hintT.textContent='"'+q.value.trim()+'" 찾은 질문 '+shown+'개';
 more.hidden=!!words.length||open||shown<=LIMIT;more.textContent='질문 '+(shown-LIMIT)+'개 더 보기';}
 var fold=document.getElementById('qfold');
@@ -268,10 +268,7 @@ def build_index(cfg, notes):
         st = f'<span class="n">{n_live}편 읽기</span>' if n_live else '<span class="z">준비 중</span>'
         on = ' class="on"' if n_live else ""
         tiles.append(f'<a{on} href="{href}"><span class="dot">{i}</span><span class="t">{html.escape(s["label"])}</span>{st}</a>')
-    ages_txt = " · ".join(a["label"] for a in cfg["ages"])
-    age_btns = "".join(
-        f'<button type="button" data-age="{a["id"]}" aria-pressed="{"true" if a["id"] == "elementary" else "false"}">{a["label"]}</button>'
-        for a in cfg["ages"])
+    # 분류는 상황 하나로 통일(11-08 휴먼쌤 "그냥 상황으로만 통일할게"): 나이 버튼은 두지 않는다. 나이는 config에 그대로 두고 검색 글자에만 쓴다
     rows = "".join(row_html("", cfg, notes[no], cfg["notes"][no]) for no in have)
     chips = "".join(f'<button type="button" data-q="{w}">{w}</button>' for w in ("숙제", "챗GPT", "개인정보", "학교"))
     body = f"""<section class="top"><div class="hero">
@@ -285,9 +282,8 @@ def build_index(cfg, notes):
 <section id="situations" aria-labelledby="sit-h"><div class="sh"><h2 id="sit-h">상황으로 찾기</h2><span>{len(tiles)}가지 상황</span></div>
 <nav class="tiles" aria-labelledby="sit-h">{"".join(tiles)}</nav></section>
 <section id="questions" aria-labelledby="all-h"><div class="sh"><h2 id="all-h">질문 번호로 찾기</h2><span>{total}개</span></div>
-<details class="card fold" id="qfold"><summary>질문 {total}개 펼치기 ({ages_txt})</summary>
+<details class="card fold" id="qfold"><summary>질문 {total}개 번호순으로 펼치기</summary>
 <div class="inner">
-<div class="seg" id="ages" role="group" aria-label="아이 나이">{age_btns}</div>
 <p class="hint" id="hint" hidden><span id="hint-t"></span><button type="button" id="clear">지우기</button></p>
 <div class="card rows" id="rows">{rows}</div>
 <button type="button" class="more-btn" id="more" hidden>더 보기</button>
