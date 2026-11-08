@@ -27,12 +27,16 @@ b,strong{font-weight:700}
 /* 머리 · 꼬리 */
 .bar{background:var(--card);border-bottom:2px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
 .bar .in{display:flex;align-items:center;justify-content:space-between;height:62px;padding-right:8px}
-.logo{font-family:var(--display);font-size:22px;color:var(--brand-ink);text-decoration:none;line-height:1}
+.logo{display:flex;align-items:center;gap:9px;font-family:var(--display);font-size:22px;color:var(--brand-ink);text-decoration:none;line-height:1}
+.logo img{width:36px;height:36px;border-radius:50%;background:var(--tint);flex:none}
+.logo>span{display:flex;flex-direction:column;line-height:1.05}
+.logo small{font-family:var(--font);font-size:12px;line-height:1.1;color:var(--soft);margin-bottom:3px}
 .nav{display:flex;align-items:center;gap:4px}
 .nav .ico{width:44px;height:44px;display:flex;align-items:center;justify-content:center;color:var(--ink)}
 .nav .pill{height:38px;padding:0 15px;border-radius:999px;background:var(--tint);color:var(--brand-ink);font-family:var(--display);font-size:15px;text-decoration:none;display:flex;align-items:center}
 .foot{background:var(--foot);color:#D6D1F0;padding:32px 0 calc(40px + env(safe-area-inset-bottom,0px));font-size:14px;line-height:1.75}
-.foot .logo{display:block;color:#fff;font-size:21px;margin-bottom:12px}
+.foot .logo{display:flex;color:#fff;font-size:21px;margin-bottom:12px}
+.foot .logo small{color:#B9B2DA}
 .foot a{color:#fff}
 
 /* 흰 띠(첫 화면 머리 · 글 머리)와 그 아래 본문 */

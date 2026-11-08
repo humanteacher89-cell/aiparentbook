@@ -178,12 +178,12 @@ def page(prefix, title, desc, body):
 <link rel="stylesheet" href="{prefix}style.css">
 </head>
 <body>
-<header class="bar"><div class="in"><a class="logo" href="{prefix or './'}">AI시대 부모백과</a>
+<header class="bar"><div class="in"><a class="logo" href="{prefix or './'}"><img src="{prefix}humanssaem-mark.png" alt="" width="36" height="36"><span><small>휴먼쌤의</small>AI시대 부모백과</span></a>
 <nav class="nav" aria-label="바로 가기"><a class="ico" href="{prefix}#search" aria-label="질문 찾기">{icon("search")}</a><a class="pill" href="{prefix}#questions">질문 목록</a></nav></div></header>
 <main>
 {body}
 </main>
-<footer class="foot"><div class="in"><span class="logo">AI시대 부모백과</span><p>질문에 답하는 사람 휴먼쌤 김수현 · <a href="{prefix}about/">소개</a></p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></div></footer>
+<footer class="foot"><div class="in"><span class="logo"><span><small>휴먼쌤의</small>AI시대 부모백과</span></span><p>질문에 답하는 사람 휴먼쌤 김수현 · <a href="{prefix}about/">소개</a> · <a href="https://human-teacher.com/" rel="noopener">휴먼쌤 사이트</a></p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></div></footer>
 </body>
 </html>
 """
@@ -271,7 +271,7 @@ def build_index(cfg, notes):
     rows = "".join(row_html("", cfg, notes[no], cfg["notes"][no]) for no in have)
     chips = "".join(f'<button type="button" data-q="{w}">{w}</button>' for w in ("숙제", "챗GPT", "개인정보", "학교"))
     body = f"""<section class="top"><div class="hero">
-<h1>AI 육아,<br>근거로 확인하세요</h1>
+<h1>아이가 쓰는 AI,<br>근거로 확인하세요</h1>
 <p class="lede">부모님이 실제로 묻는 질문을 골라 <b>결론 · 근거 · 실천</b>을 한 쪽에 정리합니다.</p>
 <form class="search" id="search" role="search"><label class="sr" for="q">질문 찾기</label><input id="q" type="search" placeholder="무엇이 궁금하세요?" autocomplete="off"><button type="submit" aria-label="찾기">{icon("search")}</button></form>
 <div class="chips"><span>자주 찾는 말</span>{chips}</div>
