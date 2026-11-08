@@ -246,6 +246,10 @@ q.addEventListener('input',function(){if(q.value.trim())unfold();show()});
 [].slice.call(document.querySelectorAll('.chips button')).forEach(function(b){b.addEventListener('click',function(){q.value=b.dataset.q;go()})});
 document.getElementById('clear').addEventListener('click',function(){q.value='';show();q.focus()});
 try{age=localStorage.getItem(KEY)||age}catch(e){}show();byHash();})();
+(function(){var bs=[].slice.call(document.querySelectorAll('.kwb')),cur=null;
+function set(b){cur=b;bs.forEach(function(x){var on=x===b;x.setAttribute('aria-expanded',on?'true':'false');document.getElementById('kp-'+x.dataset.sit).hidden=!on});
+if(b){var p=document.getElementById('kp-'+b.dataset.sit),r=p.getBoundingClientRect();if(r.top>innerHeight-120)p.scrollIntoView({behavior:'smooth',block:'start'})}}
+bs.forEach(function(b){b.addEventListener('click',function(e){e.preventDefault();set(cur===b?null:b)})});})();
 </script>"""
 
 
@@ -263,10 +267,18 @@ def build_index(cfg, notes):
                  f'<b>{inline(tn["question"])}</b></span><span class="arrow">{icon("arrow")}</span></a></section>')
     # 대표 키워드 6개(11-08 휴먼쌤 "번호나 질문 00개 다 빼고 딱 키워드만, 위아래 폭 줄이고, 대표 6개만, 검색창 바로 아래"):
     # config 상황 중 home: true. 누르면 키워드 쪽 s/<id>/. 나머지 상황 쪽은 그대로 있고 전체 질문 · 검색으로 닿는다
-    tiles = []
+    # 11-08 휴먼쌤 "키워드 누르면 아까처럼 키워드 영역 바로 아래에 질문들이 나오도록": 단추를 누르면 6개 단추 바로 아래에
+    # 그 키워드의 질문 카드가 펼쳐진다(다시 누르면 닫힘). 처음에는 아무것도 펼치지 않고, 단추는 모두 같은 모양.
+    # 자바스크립트가 없으면 단추는 키워드 쪽 s/<id>/로 간다
+    tiles, panels = [], []
     for s in [s for s in cfg["situations"] if s.get("home") and any(cfg["notes"][no]["situation"] == s["id"] for no in have)]:
-        n_live = sum(1 for no in have if cfg["notes"][no]["situation"] == s["id"] and cfg["notes"][no].get("published"))
-        tiles.append(f'<a class="kwb{" has" if n_live else ""}" href="s/{s["id"]}/">{html.escape(s.get("kw") or s["label"])}</a>')
+        nos = [no for no in have if cfg["notes"][no]["situation"] == s["id"]]
+        n_live = sum(1 for no in nos if cfg["notes"][no].get("published"))
+        tiles.append(f'<a class="kwb" href="s/{s["id"]}/" data-sit="{s["id"]}" aria-expanded="false" aria-controls="kp-{s["id"]}">'
+                     f'{html.escape(s.get("kw") or s["label"])}</a>')
+        cards = "".join(q_card("", cfg, notes[no], cfg["notes"][no]) for no in nos)
+        panels.append(f'<div class="kpanel" id="kp-{s["id"]}" hidden><p class="kt"><b>{html.escape(s["label"])}</b>'
+                      f'<span>질문 {len(nos)}개 · 읽기 {n_live}편</span></p><ul class="qcs">{cards}</ul></div>')
     # 분류는 상황 하나로 통일(11-08 휴먼쌤 "그냥 상황으로만 통일할게"): 나이 버튼은 두지 않는다. 나이는 config에 그대로 두고 검색 글자에만 쓴다
     rows = "".join(row_html("", cfg, notes[no], cfg["notes"][no]) for no in have)
     # '자주 찾는 말' 칩은 키워드 카드와 같은 일이라 뺐다(11-08). 첫 문장 아래 설명 한 줄 대신 '한 편은 이렇게 정리해요' 4단계(휴먼티처닷컴 블록 차용)
@@ -281,7 +293,9 @@ def build_index(cfg, notes):
     body = f"""<section class="top"><div class="hero">
 <h1>아이가 쓰는 AI,<br>근거로 확인하세요</h1>
 <form class="search" id="search" role="search"><label class="sr" for="q">질문 찾기</label><input id="q" type="search" placeholder="무엇이 궁금하세요?" autocomplete="off"><button type="submit" aria-label="찾기">{icon("search")}</button></form>
-<nav class="kwbs" id="situations" aria-label="대표 키워드">{"".join(tiles)}</nav>
+<section class="kwarea" id="situations" aria-labelledby="kw-h"><h2 id="kw-h">키워드로 찾기</h2>
+<nav class="kwbs" aria-labelledby="kw-h">{"".join(tiles)}</nav>
+{"".join(panels)}</section>
 </div></section>
 <div class="wrap">
 {steps}
