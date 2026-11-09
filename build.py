@@ -181,7 +181,7 @@ def page(prefix, title, desc, body):
 </head>
 <body>
 <header class="bar"><div class="in"><a class="logo" href="{prefix or './'}"><img src="{prefix}humanssaem-mark.png" alt="" width="36" height="36"><span><small>휴먼쌤의</small>AI시대 부모백과</span></a>
-<nav class="nav" aria-label="바로 가기"><a class="ico" href="{prefix}#search" aria-label="질문 찾기">{icon("search")}</a><a class="pill" href="{prefix}#questions">질문 목록</a></nav></div></header>
+<nav class="nav" aria-label="바로 가기"><a class="pill" href="{prefix}#questions">전체 질문목록</a><a class="pill collab" href="https://docs.google.com/forms/d/e/1FAIpQLSeO9-5D-C7LGZg9vhsBVJEy04mECmCaFIPb1Y-NSkT54Kj1Lw/viewform" rel="noopener">협업문의</a></nav></div></header>
 <main>
 {body}
 </main>
@@ -221,7 +221,7 @@ def build_latest(cfg, n, c):
 <article class="card latest"><p class="mt"><span class="tag">{age_label(cfg, c)} · {html.escape(sit_of(cfg, c)["label"])}</span><span class="qno">질문 {n['no']}</span></p>
 <h3><a href="{href}">{inline(n['question'])}</a></h3>
 <dl><div><dt>결론</dt><dd><b>{html.escape(big)}</b> {first}</dd></div><div><dt>근거</dt><dd>{ev}</dd></div></dl>
-<a class="more" href="{href}">결론 · 근거 · 실천 읽기{icon("arrow")}</a></article></section>"""
+</article></section>"""
 
 
 HOME_JS = """<script>
@@ -233,18 +233,22 @@ function show(){var term=q.value.trim().toLowerCase(),words=term?term.split(/\\s
 btns.forEach(function(b){b.setAttribute('aria-pressed',!words.length&&b.dataset.age===age?'true':'false')});
 rows.forEach(function(t){var ok=words.length?words.every(function(w){return t.dataset.text.indexOf(w)>-1}):(!btns.length||(' '+t.dataset.ages+' ').indexOf(' '+age+' ')>-1);if(ok)shown++;t.hidden=!ok||(!words.length&&!open&&shown>LIMIT)});
 box.hidden=!shown;empty.hidden=!!shown;empty.textContent=words.length?EMPTY_Q:EMPTY_AGE;hint.hidden=!words.length;if(words.length)hintT.textContent='"'+q.value.trim()+'" 찾은 질문 '+shown+'개';
-more.hidden=!!words.length||open||shown<=LIMIT;more.textContent='질문 '+(shown-LIMIT)+'개 더 보기';}
+more.hidden=!!words.length||open||shown<=LIMIT;more.textContent='질문 '+(shown-LIMIT)+'개 더 보기';
+var qr=document.getElementById('qres');if(words.length){var hit=rows.filter(function(t){return words.every(function(w){return t.dataset.text.indexOf(w)>-1})});
+document.getElementById('qres-t').textContent=hit.length?'"'+q.value.trim()+'" 찾은 질문 '+hit.length+'개':EMPTY_Q;
+var qrr=document.getElementById('qres-rows');qrr.innerHTML=hit.map(function(t){var c=t.cloneNode(true);c.hidden=false;return c.outerHTML}).join('');qrr.hidden=!hit.length;qr.hidden=false}else qr.hidden=true;}
 var fold=document.getElementById('qfold');
 function unfold(){if(fold&&!fold.open)fold.open=true}
-function go(){unfold();show();list.scrollIntoView({behavior:'smooth',block:'start'})}
+function go(){show();if(q.value.trim()){document.getElementById('qres').scrollIntoView({behavior:'smooth',block:'nearest'})}else{unfold();list.scrollIntoView({behavior:'smooth',block:'start'})}}
 function byHash(){if(location.hash==='#questions'){unfold();list.scrollIntoView({block:'start'})}}
 window.addEventListener('hashchange',byHash);
 btns.forEach(function(b){b.addEventListener('click',function(){age=b.dataset.age;q.value='';open=false;try{localStorage.setItem(KEY,age)}catch(e){}show()})});
 more.addEventListener('click',function(){open=true;show()});
 document.getElementById('search').addEventListener('submit',function(e){e.preventDefault();go()});
-q.addEventListener('input',function(){if(q.value.trim())unfold();show()});
+q.addEventListener('input',function(){show()});
 [].slice.call(document.querySelectorAll('.chips button')).forEach(function(b){b.addEventListener('click',function(){q.value=b.dataset.q;go()})});
 document.getElementById('clear').addEventListener('click',function(){q.value='';show();q.focus()});
+document.getElementById('qres-x').addEventListener('click',function(){q.value='';show();q.focus()});
 try{age=localStorage.getItem(KEY)||age}catch(e){}show();byHash();})();
 (function(){var bs=[].slice.call(document.querySelectorAll('.kwb')),cur=null;
 function set(b){cur=b;bs.forEach(function(x){var on=x===b;x.setAttribute('aria-expanded',on?'true':'false');document.getElementById('kp-'+x.dataset.sit).hidden=!on});
@@ -293,7 +297,8 @@ def build_index(cfg, notes):
     body = f"""<section class="top"><div class="hero">
 <h1>아이가 쓰는 AI,<br>근거로 확인하세요</h1>
 <form class="search" id="search" role="search"><label class="sr" for="q">질문 찾기</label><input id="q" type="search" placeholder="무엇이 궁금하세요?" autocomplete="off"><button type="submit" aria-label="찾기">{icon("search")}</button></form>
-<section class="kwarea" id="situations" aria-labelledby="kw-h"><h2 id="kw-h">키워드로 찾기</h2>
+<div class="qres" id="qres" hidden><p class="qres-h"><span id="qres-t"></span><button type="button" class="qres-x" id="qres-x">지우기</button></p><div class="card rows" id="qres-rows"></div></div>
+<section class="kwarea" id="situations" aria-labelledby="kw-h"><h2 id="kw-h">키워드 검색</h2>
 <nav class="kwbs" aria-labelledby="kw-h">{"".join(tiles)}</nav>
 {"".join(panels)}</section>
 </div></section>
@@ -310,9 +315,9 @@ def build_index(cfg, notes):
 </div></details></section>
 <section aria-label="답하는 사람"><article class="card whoam">
 <img src="humanssaem-mark.png" alt="" width="52" height="52">
-<p><b>휴먼쌤, 생각주도력 키우는 교사아빠</b>공립 초등교사 14년차 · 딸 둘 아빠</p>
+<p><b>휴먼쌤, 생각주도력 키우는 교사아빠</b>14년차 초등교사 · 딸 둘 아빠</p>
 <a class="btn ghost" href="https://human-teacher.com/" rel="noopener">휴먼쌤 소개 페이지 바로 가기</a>
-<a class="btn brand" href="https://contents.premium.naver.com/humanteacher/humanteacher89" rel="noopener">무료 학습 자료 받으러 가기</a>
+<a class="btn brand" href="https://contents.premium.naver.com/humanteacher/humanteacher89" rel="noopener">무료 활동지 · 새소식 받으러 가기</a>
 </article></section>
 </div>
 {HOME_JS}"""
@@ -423,7 +428,7 @@ def q_card(prefix, cfg, n, c):
         big, _, _ = split_conclusion(n)
         lead = f'<p class="ql">{html.escape(big)}</p>'
     st = '<span class="st on">읽기</span>' if live else '<span class="st">정리 중</span>'
-    go = f'<span class="go">결론 · 근거 · 실천 읽기{icon("arrow")}</span>' if live else ""
+    go = ""  # 11-09 휴먼쌤 "이런 버튼은 빼줘" — 카드 전체가 링크
     return (f'<li><a class="card qc{" live" if live else ""}" href="{prefix}q/{n["no"]}/"><span class="qm"><span class="qno">질문 {n["no"]}</span>{st}</span>'
             f'<b>{inline(n["question"])}</b>{lead}{go}</a></li>')
 
