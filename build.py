@@ -291,11 +291,10 @@ def build_index(cfg, notes):
 <li><i>1</i><div><b>질문</b><p>부모님이 실제로 묻는 말 그대로 시작해요. "숙제할 때 챗GPT 써도 되나요?"처럼요.</p></div></li>
 <li><i>2</i><div><b>결론</b><p>답을 먼저 한 줄로 말해요. 되는지 안 되는지, 그리고 그보다 중요한 것이 무엇인지.</p></div></li>
 <li><i>3</i><div><b>근거</b><p>연구를 셋 안팎 골라 누가 누구를 어떻게 살폈는지 적고, 그 연구가 말해 주지 못하는 것(한계)도 함께 적어요.</p></div></li>
-<li><i>4</i><div><b>오늘 해 볼 한 가지</b><p>집에서 바로 해 볼 한 가지를 질문하기 · 확인하기 · 실천하기 세 걸음(휴먼쌤 ACT)으로 정리해요.</p>
-<span class="actchips"><span class="a">A 질문하기</span><span class="c">C 확인하기</span><span class="t">T 실천하기</span></span></div></li>
+<li><i>4</i><div><b>오늘 해 볼 한 가지</b><p>집에서 바로 해 볼 한 가지를 질문하기 · 확인하기 · 실천하기 세 걸음(휴먼쌤 ACT)으로 정리해요.</p></div></li>
 </ol></section>"""
     body = f"""<section class="top"><div class="hero">
-<h1>아이가 쓰는 AI,<br>근거로 확인하세요</h1>
+<h1>부모님들의 AI 궁금증,<br>근거로 확인하세요.</h1>
 <form class="search" id="search" role="search"><label class="sr" for="q">질문 찾기</label><input id="q" type="search" placeholder="무엇이 궁금하세요?" autocomplete="off"><button type="submit" aria-label="찾기">{icon("search")}</button></form>
 <div class="qres" id="qres" hidden><p class="qres-h"><span id="qres-t"></span><button type="button" class="qres-x" id="qres-x">지우기</button></p><div class="card rows" id="qres-rows"></div></div>
 <section class="kwarea" id="situations" aria-labelledby="kw-h"><h2 id="kw-h">키워드 검색</h2>
