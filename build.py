@@ -176,6 +176,10 @@ def page(prefix, title, desc, body):
 <meta property="og:description" content="{d}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="AI시대 부모백과">
+<meta property="og:image" content="https://aiparentbook.com/og-20261113.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1C1A2C" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="{prefix}favicon.svg" type="image/svg+xml">
