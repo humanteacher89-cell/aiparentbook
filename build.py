@@ -181,12 +181,12 @@ def page(prefix, title, desc, body):
 </head>
 <body>
 <header class="bar"><div class="in"><a class="logo" href="{prefix or './'}"><img src="{prefix}humanssaem-mark.png" alt="" width="36" height="36"><span><small>휴먼쌤의</small>AI시대 부모백과</span></a>
-<nav class="nav" aria-label="바로 가기"><a class="pill" href="{prefix}#questions">전체 질문목록</a><a class="pill collab" href="#contact">협업문의</a></nav></div></header>
+<nav class="nav" aria-label="바로 가기"><a class="pill" href="{prefix}#questions">전체 질문목록</a><a class="pill collab" href="#ask">협업문의</a></nav></div></header>
 <main>
 {body}
 </main>
 <footer class="foot"><div class="in"><span class="logo"><span><small>휴먼쌤의</small>AI시대 부모백과</span></span><p>질문에 답하는 사람 휴먼쌤 김수현 · <a href="{prefix}about/">소개</a> · <a href="https://human-teacher.com/" rel="noopener">휴먼쌤 사이트</a></p><p>광고 없이 운영합니다. 결론과 근거는 누구나 무료로 읽을 수 있어요.</p></div></footer>
-<div class="cpop" id="contact" role="dialog" aria-modal="true" aria-labelledby="cpop-t"><a class="cpop-bg" href="#close" aria-label="닫기"></a><div class="cpop-box"><a class="cpop-x" href="#close" aria-label="닫기">×</a><b id="cpop-t">협업 문의</b><p>강의 · 연수 · 원고 · 자문 등 협업은 아래로 연락 주세요.</p><a class="cpop-row" href="tel:010-9515-3763"><small>전화</small>010-9515-3763</a><a class="cpop-row" href="mailto:humanteacher89@gmail.com"><small>이메일</small>humanteacher89@gmail.com</a></div></div>
+<div class="cpop" id="ask" role="dialog" aria-modal="true" aria-labelledby="cpop-t"><a class="cpop-bg" href="#close" aria-label="닫기"></a><div class="cpop-box"><a class="cpop-x" href="#close" aria-label="닫기">×</a><b id="cpop-t">협업 문의</b><p>강의 · 연수 · 원고 · 자문 등 협업은 아래로 연락 주세요.</p><a class="cpop-row" href="tel:010-9515-3763"><small>전화</small>010-9515-3763</a><a class="cpop-row" href="mailto:humanteacher89@gmail.com"><small>이메일</small>humanteacher89@gmail.com</a></div></div>
 </body>
 </html>
 """
