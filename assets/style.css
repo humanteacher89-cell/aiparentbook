@@ -247,10 +247,11 @@ mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
 .cpop{display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:16px}
 .cpop:target{display:flex}
 .cpop-bg{position:absolute;inset:0;background:rgba(20,24,36,.55)}
-.cpop-box{position:relative;background:#fff;border-radius:22px;width:100%;max-width:380px;padding:28px 22px 22px;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:left}
-.cpop-box>b{display:block;font-family:'Jua',sans-serif;font-weight:400;font-size:24px;color:#1E2B47;margin:0 0 6px}
-.cpop-box>p{margin:0 0 16px;font-size:15px;line-height:1.6;color:#5B6275}
-.cpop-row{display:flex;flex-direction:column;gap:2px;padding:12px 16px;margin-top:10px;border:2px solid #F1E3D3;border-radius:14px;color:#1E2B47;font-size:18px;font-weight:700;text-decoration:none;word-break:break-all}
-.cpop-row small{font-size:13px;font-weight:400;color:#8A8F9C}
-.cpop-row:hover,.cpop-row:focus{border-color:#C9482A}
-.cpop-x{position:absolute;top:10px;right:14px;font-size:28px;line-height:1;color:#8A8F9C;text-decoration:none;padding:4px 8px}
+/* 2026-11-13 다크모드 점검: 팝업만 밝은 색이 박혀 있어 어두운 화면에서 흰 상자로 튐 → 이 사이트의 색 변수(밝은 판 · 어두운 판)를 타게 함 */
+.cpop-box{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:22px;width:100%;max-width:380px;padding:28px 22px 22px;box-shadow:0 18px 50px rgba(0,0,0,.25);text-align:left}
+.cpop-box>b{display:block;font-family:var(--display);font-weight:400;font-size:24px;color:var(--ink);margin:0 0 6px}
+.cpop-box>p{margin:0 0 16px;font-size:15px;line-height:1.6;color:var(--soft)}
+.cpop-row{display:flex;flex-direction:column;gap:2px;padding:12px 16px;margin-top:10px;border:2px solid var(--line);border-radius:14px;color:var(--ink);font-size:18px;font-weight:700;text-decoration:none;word-break:break-all}
+.cpop-row small{font-size:13px;font-weight:400;color:var(--soft)}
+.cpop-row:hover,.cpop-row:focus{border-color:var(--brand-ink)}
+.cpop-x{position:absolute;top:10px;right:14px;font-size:28px;line-height:1;color:var(--soft);text-decoration:none;padding:4px 8px}
