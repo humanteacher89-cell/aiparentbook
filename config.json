@@ -2,73 +2,389 @@
   "site_name": "AI시대 부모백과",
   "tagline": "부모의 질문에 답하는 AI 교육 가이드",
   "ages": [
-    {"id": "preschool", "label": "유아"},
-    {"id": "elementary", "label": "초등"},
-    {"id": "teen", "label": "중고등"}
+    {
+      "id": "preschool",
+      "label": "유아"
+    },
+    {
+      "id": "elementary",
+      "label": "초등"
+    },
+    {
+      "id": "teen",
+      "label": "중고등"
+    }
   ],
   "situations": [
-    {"id": "homework", "label": "숙제에 AI를 쓰려고 해요", "kw": "숙제", "home": true},
-    {"id": "start", "label": "처음 AI를 써 보려고 해요", "kw": "처음 쓸 때", "home": true},
-    {"id": "trust", "label": "AI 답을 그대로 믿어요", "kw": "AI 답 믿기", "home": true},
-    {"id": "wrong", "label": "AI가 틀린 것 같아요", "kw": "틀린 답"},
-    {"id": "ask", "label": "AI에게 어떻게 물어야 할지 몰라요", "kw": "묻는 법"},
-    {"id": "practice", "label": "배운 걸 직접 해 보게 하고 싶어요", "kw": "직접 해 보기"},
-    {"id": "heart", "label": "아이 마음이 걱정돼요", "kw": "아이 마음", "home": true},
-    {"id": "safety", "label": "개인정보·안전이 걱정돼요", "kw": "개인정보·안전", "home": true},
-    {"id": "school", "label": "학교·선생님과 맞춰야 해요", "kw": "학교·선생님", "home": true},
-    {"id": "age", "label": "아이 나이에 맞게 쓰고 싶어요", "kw": "나이"},
-    {"id": "future", "label": "AI 시대에 무엇을 길러야 할까요", "kw": "길러야 할 힘"}
+    {
+      "id": "homework",
+      "label": "숙제에 AI를 쓰려고 해요",
+      "kw": "숙제",
+      "home": true
+    },
+    {
+      "id": "start",
+      "label": "처음 AI를 써 보려고 해요",
+      "kw": "처음 쓸 때",
+      "home": true
+    },
+    {
+      "id": "trust",
+      "label": "AI 답을 그대로 믿어요",
+      "kw": "AI 답 믿기",
+      "home": true
+    },
+    {
+      "id": "wrong",
+      "label": "AI가 틀린 것 같아요",
+      "kw": "틀린 답"
+    },
+    {
+      "id": "ask",
+      "label": "AI에게 어떻게 물어야 할지 몰라요",
+      "kw": "묻는 법"
+    },
+    {
+      "id": "practice",
+      "label": "배운 걸 직접 해 보게 하고 싶어요",
+      "kw": "직접 해 보기"
+    },
+    {
+      "id": "heart",
+      "label": "아이 마음이 걱정돼요",
+      "kw": "아이 마음",
+      "home": true
+    },
+    {
+      "id": "safety",
+      "label": "개인정보·안전이 걱정돼요",
+      "kw": "개인정보·안전",
+      "home": true
+    },
+    {
+      "id": "school",
+      "label": "학교·선생님과 맞춰야 해요",
+      "kw": "학교·선생님",
+      "home": true
+    },
+    {
+      "id": "age",
+      "label": "아이 나이에 맞게 쓰고 싶어요",
+      "kw": "나이"
+    },
+    {
+      "id": "future",
+      "label": "AI 시대에 무엇을 길러야 할까요",
+      "kw": "길러야 할 힘"
+    }
   ],
   "notes": {
-    "001": {"published": true, "release": "2026-10-13", "ages": ["elementary"], "situation": "homework", "nepcon_url": "https://contents.premium.naver.com/humanteacher/humanteacher89/contents/261013204144598up"},
-    "002": {"published": false, "release": "2026-10-29", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
-    "003": {"published": false, "release": "2026-11-05", "ages": ["elementary"], "situation": "safety", "nepcon_url": ""},
-    "004": {"published": false, "release": "2026-11-12", "ages": ["elementary"], "situation": "trust", "nepcon_url": ""},
-    "005": {"published": false, "release": "2026-11-19", "ages": ["elementary"], "situation": "wrong", "nepcon_url": ""},
-    "006": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "homework", "nepcon_url": ""},
-    "007": {"published": false, "release": "", "ages": ["elementary"], "situation": "age", "nepcon_url": ""},
-    "008": {"published": false, "release": "", "ages": ["elementary"], "situation": "school", "nepcon_url": ""},
-    "009": {"published": false, "release": "", "ages": ["elementary"], "situation": "homework", "nepcon_url": ""},
-    "010": {"published": false, "release": "", "ages": ["elementary"], "situation": "ask", "nepcon_url": ""},
-    "011": {"published": false, "release": "", "ages": ["elementary"], "situation": "ask", "nepcon_url": ""},
-    "012": {"published": false, "release": "", "ages": ["elementary"], "situation": "trust", "nepcon_url": ""},
-    "013": {"published": false, "release": "", "ages": ["elementary"], "situation": "practice", "nepcon_url": ""},
-    "014": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "homework", "nepcon_url": ""},
-    "015": {"published": false, "release": "", "ages": ["elementary"], "situation": "heart", "nepcon_url": ""},
-    "016": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "start", "nepcon_url": ""},
-    "017": {"published": false, "release": "", "ages": ["elementary"], "situation": "safety", "nepcon_url": ""},
-    "018": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "school", "nepcon_url": ""},
-    "019": {"published": false, "release": "", "ages": ["preschool"], "situation": "age", "nepcon_url": ""},
-    "020": {"published": false, "release": "", "ages": ["elementary"], "situation": "future", "nepcon_url": ""},
-    "021": {"published": false, "release": "", "ages": ["elementary"], "situation": "ask", "nepcon_url": ""},
-    "022": {"published": false, "release": "", "ages": ["elementary"], "situation": "wrong", "nepcon_url": ""},
-    "023": {"published": false, "release": "", "ages": ["elementary"], "situation": "practice", "nepcon_url": ""},
-    "024": {"published": false, "release": "", "ages": ["elementary"], "situation": "homework", "nepcon_url": ""},
-    "025": {"published": false, "release": "", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
-    "026": {"published": false, "release": "", "ages": ["elementary"], "situation": "heart", "nepcon_url": ""},
-    "027": {"published": false, "release": "", "ages": ["elementary"], "situation": "safety", "nepcon_url": ""},
-    "028": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "school", "nepcon_url": ""},
-    "029": {"published": false, "release": "", "ages": ["teen"], "situation": "age", "nepcon_url": ""},
-    "030": {"published": false, "release": "", "ages": ["elementary"], "situation": "future", "nepcon_url": ""},
-    "031": {"published": false, "release": "", "ages": ["elementary"], "situation": "ask", "nepcon_url": ""},
-    "032": {"published": false, "release": "", "ages": ["elementary"], "situation": "trust", "nepcon_url": ""},
-    "033": {"published": false, "release": "", "ages": ["elementary"], "situation": "practice", "nepcon_url": ""},
-    "034": {"published": false, "release": "", "ages": ["elementary"], "situation": "homework", "nepcon_url": ""},
-    "035": {"published": false, "release": "", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
-    "036": {"published": false, "release": "", "ages": ["preschool", "elementary"], "situation": "heart", "nepcon_url": ""},
-    "037": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "safety", "nepcon_url": ""},
-    "038": {"published": false, "release": "", "ages": ["elementary"], "situation": "school", "nepcon_url": ""},
-    "039": {"published": false, "release": "", "ages": ["preschool"], "situation": "age", "nepcon_url": ""},
-    "040": {"published": false, "release": "", "ages": ["elementary"], "situation": "future", "nepcon_url": ""},
-    "041": {"published": false, "release": "", "ages": ["preschool", "elementary"], "situation": "ask", "nepcon_url": ""},
-    "042": {"published": false, "release": "", "ages": ["elementary"], "situation": "practice", "nepcon_url": ""},
-    "043": {"published": false, "release": "", "ages": ["elementary"], "situation": "homework", "nepcon_url": ""},
-    "044": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "homework", "nepcon_url": ""},
-    "045": {"published": false, "release": "", "ages": ["elementary"], "situation": "start", "nepcon_url": ""},
-    "046": {"published": false, "release": "", "ages": ["elementary"], "situation": "heart", "nepcon_url": ""},
-    "047": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "heart", "nepcon_url": ""},
-    "048": {"published": false, "release": "", "ages": ["elementary"], "situation": "school", "nepcon_url": ""},
-    "049": {"published": false, "release": "", "ages": ["teen"], "situation": "age", "nepcon_url": ""},
-    "050": {"published": false, "release": "", "ages": ["elementary", "teen"], "situation": "future", "nepcon_url": ""}
+    "001": {
+      "published": true,
+      "release": "2026-10-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "homework",
+      "nepcon_url": "https://contents.premium.naver.com/humanteacher/humanteacher89/contents/261013204144598up",
+      "hidden": true
+    },
+    "n01": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "start",
+      "nepcon_url": ""
+    },
+    "n02": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "start",
+      "nepcon_url": ""
+    },
+    "n03": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "age",
+      "nepcon_url": ""
+    },
+    "n04": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "start",
+      "nepcon_url": ""
+    },
+    "n05": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "start",
+      "nepcon_url": ""
+    },
+    "n06": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "homework",
+      "nepcon_url": ""
+    },
+    "n07": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "homework",
+      "nepcon_url": ""
+    },
+    "n08": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "trust",
+      "nepcon_url": ""
+    },
+    "n09": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "trust",
+      "nepcon_url": ""
+    },
+    "n10": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "ask",
+      "nepcon_url": ""
+    },
+    "n11": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "heart",
+      "nepcon_url": ""
+    },
+    "n12": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "practice",
+      "nepcon_url": ""
+    },
+    "n13": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "trust",
+      "nepcon_url": ""
+    },
+    "n14": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "safety",
+      "nepcon_url": ""
+    },
+    "n15": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "safety",
+      "nepcon_url": ""
+    },
+    "n16": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "safety",
+      "nepcon_url": ""
+    },
+    "n17": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "safety",
+      "nepcon_url": ""
+    },
+    "n18": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "heart",
+      "nepcon_url": ""
+    },
+    "n19": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "heart",
+      "nepcon_url": ""
+    },
+    "n20": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "school",
+      "nepcon_url": ""
+    },
+    "n21": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "school",
+      "nepcon_url": ""
+    },
+    "n22": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "homework",
+      "nepcon_url": ""
+    },
+    "n23": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "safety",
+      "nepcon_url": ""
+    },
+    "n24": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "homework",
+      "nepcon_url": ""
+    },
+    "n25": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "ask",
+      "nepcon_url": ""
+    },
+    "n26": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "trust",
+      "nepcon_url": ""
+    },
+    "n27": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "future",
+      "nepcon_url": ""
+    },
+    "n28": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "practice",
+      "nepcon_url": ""
+    },
+    "n29": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "trust",
+      "nepcon_url": ""
+    },
+    "n30": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "trust",
+      "nepcon_url": ""
+    },
+    "n31": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "homework",
+      "nepcon_url": ""
+    },
+    "n32": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "safety",
+      "nepcon_url": ""
+    },
+    "n33": {
+      "published": true,
+      "release": "2026-11-13",
+      "ages": [
+        "elementary"
+      ],
+      "situation": "heart",
+      "nepcon_url": ""
+    }
   }
 }

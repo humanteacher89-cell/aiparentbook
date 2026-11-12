@@ -255,3 +255,22 @@ mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
 .cpop-row small{font-size:13px;font-weight:400;color:var(--soft)}
 .cpop-row:hover,.cpop-row:focus{border-color:var(--brand-ink)}
 .cpop-x{position:absolute;top:10px;right:14px;font-size:28px;line-height:1;color:var(--soft);text-decoration:none;padding:4px 8px}
+/* 2026-11-13 새 글 꼴(초등편 33개): 장면 · 근거 종류 · 출처 · 표 · 휴먼쌤 원칙 */
+.scene{margin:14px 0 4px;padding:14px 16px;border-left:4px solid var(--amber);background:var(--card);border-radius:0 14px 14px 0}
+.scene b{display:block;font-family:var(--display);font-weight:400;font-size:15px;color:var(--brand-ink);margin-bottom:4px}
+.scene p{margin:0;font-size:16px;line-height:1.75;color:var(--ink2)}
+.summary .pl,.v2p .pl{margin:10px 0 0;padding-left:20px;display:grid;gap:6px;font-size:16px;line-height:1.7}
+.summary .big{line-height:1.45}
+.today.say{margin-top:10px}
+.ev h3 .kd{display:inline-block;margin:0 8px 0 0;font-family:var(--font);font-size:13px;line-height:1;color:var(--brand-ink);border:1.5px solid var(--line);border-radius:999px;padding:4px 9px;vertical-align:3px}
+.ev .src,.v2x .src{margin-top:10px;font-size:13.5px;line-height:1.6;color:var(--soft)}
+.ev .nob,.v2x .nob{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:15px;line-height:1.7;color:var(--ink2)}
+.ev .nob b{font-family:var(--display);font-weight:400;color:var(--brand-ink);margin-right:6px}
+.ev .pq,.v2x .pq{margin:12px 0 0;padding:12px 14px;background:var(--tint);border-radius:12px;font-family:var(--display);font-size:17px;line-height:1.5}
+.tw{overflow-x:auto;margin:10px 0}.tw table{border-collapse:collapse;min-width:100%;font-size:14.5px;line-height:1.55}
+.tw th,.tw td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}.tw th{background:var(--tint);font-weight:700}
+.v2x{margin-top:14px}.v2x .xh{display:block;font-family:var(--display);font-weight:400;font-size:17px;margin-bottom:6px}
+.unk p{margin:6px 0 0}.v2p .pl{margin-top:0}
+.ev .body ol,.ev .body .pl{margin:8px 0;padding-left:22px;display:grid;gap:6px}
+.ev .body a,.summary a,.v2p a,.unk a{color:var(--brand-ink)}
+.tw table{min-width:440px}.tw th:first-child,.tw td:first-child,.tw th:last-child,.tw td:last-child{white-space:nowrap}
