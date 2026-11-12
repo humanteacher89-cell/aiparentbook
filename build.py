@@ -157,6 +157,11 @@ def icon(name):
 
 
 # ---------------------------------------------------------------- page shell
+# 스타일 주소에 내용 해시를 붙인다(2026-11-13: 브라우저가 옛 style.css를 기억해 새 화면이 깨져 보인 일)
+import hashlib
+CSSV = hashlib.md5((ASSETS / 'style.css').read_bytes()).hexdigest()[:10]
+
+
 def page(prefix, title, desc, body):
     t = html.escape(title)
     d = html.escape(desc)
@@ -177,7 +182,7 @@ def page(prefix, title, desc, body):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Gowun+Dodum&display=swap">
-<link rel="stylesheet" href="{prefix}style.css">
+<link rel="stylesheet" href="{prefix}style.css?v={CSSV}">
 </head>
 <body>
 <header class="bar"><div class="in"><a class="logo" href="{prefix or './'}"><img src="{prefix}humanssaem-mark.png" alt="" width="36" height="36"><span><small>휴먼쌤의</small>AI시대 부모백과</span></a>
