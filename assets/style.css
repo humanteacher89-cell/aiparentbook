@@ -38,6 +38,7 @@ b,strong{font-weight:700}
 .foot .logo{display:flex;color:#fff;font-size:21px;margin-bottom:12px}
 .foot .logo small{color:#B9B2DA}
 .foot a{color:#fff}
+.foot .fl{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.foot .fl a{padding:7px 14px;border:1.5px solid #6F66A8;border-radius:999px;text-decoration:none;font-size:14px}
 
 /* 흰 띠(첫 화면 머리 · 글 머리)와 그 아래 본문 */
 .top{background:var(--card);border-bottom:2px solid var(--line)}
