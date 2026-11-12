@@ -242,6 +242,8 @@ mark{background:var(--mark);color:inherit;padding:0 2px;border-radius:3px}
 .nav .pill.collab{background:var(--brand);color:#fff}@media (max-width:400px){.nav .pill{padding-left:11px;padding-right:11px;font-size:13.5px}}
 .kwbs{padding-top:7px;padding-right:7px}.kwb{position:relative}.kwb[aria-expanded="true"]::after{content:"\00d7";position:absolute;top:-6px;right:-5px;width:17px;height:17px;border-radius:50%;background:#D93A2B;color:#fff;font:700 13px/17px sans-serif;text-align:center;box-shadow:0 0 0 2px #fff}
 .kwbs{padding-right:0}.kwbs::after{content:"";flex:none;width:8px}
+/* 11-13 키워드 일곱: 옆으로 넘기지 않고 줄을 바꿔 한눈에 다 보이게 */
+.kwbs,.kwbs[class]{flex-wrap:wrap;overflow:visible;gap:7px 6px}.kwbs::after{display:none}
 
 /* 협업 문의 연락처 팝업 (2026-11-12 휴먼쌤 "구글폼 말고 연락처 팝업되도록"). JS 없이 :target으로 연다 */
 .cpop{display:none;position:fixed;inset:0;z-index:1000;align-items:center;justify-content:center;padding:16px}
